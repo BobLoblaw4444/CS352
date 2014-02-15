@@ -3,41 +3,36 @@ options {
   STATIC = false;
 }
 
-PARSER_BEGIN(Lexer)
+PARSER_BEGIN(Parser)
     package edu.purdue.cs352.minijava.parser;
-
+    
     import java.util.*;
 
-    public class Lexer {
+    public class Parser {
         public static void main(String[] args) {
-            Lexer lexer;
-            List<Token> tl;
+            Parser parser;
 
             if (args.length != 1) {
-                System.out.println("Use: mjlex <input file>");
+                System.out.println("Use: mjparse <input file>");
                 return;
             }
 
             try {
-                lexer = new Lexer(new java.io.FileInputStream(args[0]));
+                parser = new Parser(new java.io.FileInputStream(args[0]));
             } catch (java.io.FileNotFoundException ex) {
                 System.out.println("File " + args[0] + " not found.");
                 return;
             }
 
             try {
-                tl = lexer.TokenList();
+                parser.Program();
             } catch (ParseException ex) {
                 System.out.println(ex.getMessage());
                 return;
             }
-
-            for (Token tok : tl) {
-                System.out.println(tok);
-            }
         }
     }
-PARSER_END(Lexer)
+PARSER_END(Parser)
 
 // Lexical definitions
 
@@ -185,4 +180,24 @@ Token Token():
 |   < SYM_COMMA>
     )
     { return token; }
+}
+
+// Grammar
+void Program():
+{
+    // FILLIN: Variable declarations if needed (for ParserAST.jj only)
+}
+{
+    // FILLIN
+}
+
+// FILLIN: Remainder of the grammar
+
+void PrimaryExp():
+{
+    // FILLIN: Variable declarations if needed (for ParserAST.jj only)
+}
+{
+    <INT_LITERAL>
+|   // FILLIN: ...
 }
