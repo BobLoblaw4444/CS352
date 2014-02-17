@@ -8,25 +8,34 @@ PARSER_BEGIN(Parser)
     
     import java.util.*;
 
-    public class Parser {
-        public static void main(String[] args) {
+    public class Parser 
+    {
+        public static void main(String[] args) 
+        {
             Parser parser;
 
-            if (args.length != 1) {
+            if (args.length != 1) 
+            {
                 System.out.println("Use: mjparse <input file>");
                 return;
             }
 
-            try {
+            try 
+            {
                 parser = new Parser(new java.io.FileInputStream(args[0]));
-            } catch (java.io.FileNotFoundException ex) {
+            } 
+            catch (java.io.FileNotFoundException ex)
+            {
                 System.out.println("File " + args[0] + " not found.");
                 return;
             }
 
-            try {
+            try 
+            {
                 parser.Program();
-            } catch (ParseException ex) {
+            } 
+            catch (ParseException ex)
+            {
                 System.out.println(ex.getMessage());
                 return;
             }
@@ -39,7 +48,7 @@ PARSER_END(Parser)
 // Whitespace
 SKIP :
 {
-    < " " | "\t" | "\n" | "\r" | "\f">
+    < " " | "\t" | "\n" | "\r" | "\f" >
 }
 
 // Comments
@@ -110,7 +119,7 @@ TOKEN :
 // Integer literals
 TOKEN :
 {
-    < INT_LITERAL: (["0"-"9"])* >
+    < INT_LITERAL: (["0"-"9"])+ >
 }
 
 /* The following is a simple grammar that will allow you to test the generated
@@ -185,19 +194,162 @@ Token Token():
 // Grammar
 void Program():
 {
-    // FILLIN: Variable declarations if needed (for ParserAST.jj only)
+
 }
 {
-    // FILLIN
+    MainClass() ( ClassDeclaration() )* <EOF>
 }
 
-// FILLIN: Remainder of the grammar
+void MainClass():
+{
+
+}
+{
+    "class" Identifier() "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier() ")" "{" (Statement())* "}" "}"
+}
+
+void ClassDeclaration():
+{
+
+}
+{
+    "class" Identifier() ( "extends" Identifier() )? "{" ( VarDeclaration() )* ( MethodDeclaration() )* "}"
+}
+
+void VarDeclaration():
+{
+
+}
+{
+    Type() Identifier() ";"
+}
+
+void MethodDeclaration():
+{
+
+}
+{
+
+    "public" Type() Identifier() "(" 
+    (
+        Type() Identifier() 
+        ( 
+            "," Type() Identifier()
+        )*
+    )? 
+    ")" "{" (LOOKAHEAD(2) VarDeclaration() )* ( Statement() )* "return" Expression() ";" "}"
+}
+
+void Type():
+{
+
+}
+{
+    LOOKAHEAD(2) "int" "[" "]"
+    |     "boolean"
+    |     "int"
+    |     Identifier()
+}
+
+void Statement():
+{
+
+}
+{
+    "{" ( Statement() )* "}"
+    |     "if" "(" Expression() ")" Statement() ( LOOKAHEAD(2) "else" Statement() )?
+    |     "while" "(" Expression() ")" Statement()
+    |     "System.out.println" "(" Expression() ")" ";"
+    |     Expression() ";"
+}
+
+void Expression():
+{
+
+}
+{
+    AssignExpr()
+}
+
+void AssignExpr():
+{
+
+}
+{
+    LogicOp() ( "=" AssignExpr() )?
+}
+
+void LogicOp():
+{
+
+}
+{
+    CmpOp() ( ( "&&" | "||" ) CmpOp() )*
+}
+
+void CmpOp():
+{
+
+}
+{
+    AddOp() ( ( "<" | "<=" | "==" | "!=" | ">" | ">=" ) AddOp() )*
+}
+
+void AddOp():
+{
+
+}
+{
+    MulOp() ( ( "+" | "-" ) MulOp() )*
+}
+
+void MulOp():
+{
+
+}
+{
+    UnaryOp() ( ( "*" | "/" | "%" ) UnaryOp() )*
+}
+
+void UnaryOp():
+{
+
+}
+{
+    "!" UnaryOp()
+    |     PostfixOp()
+}
+
+void PostfixOp():
+{
+
+}
+{
+    PrimaryExp() ("[" Expression() "]"
+    |     LOOKAHEAD(3) "." Identifier() "(" ( Expression() ( "," Expression() )* )? ")"
+    |     "." Identifier()
+         PrimaryExp())*
+}
 
 void PrimaryExp():
 {
-    // FILLIN: Variable declarations if needed (for ParserAST.jj only)
+
 }
 {
     <INT_LITERAL>
-|   // FILLIN: ...
+    |     "true"
+    |     "false"
+    |     Identifier()
+    |     "this"
+    |     LOOKAHEAD(2) "new" "int" "[" Expression() "]"
+    |     "new" Identifier() "(" ")"
+    |     "(" Expression() ")"
+}
+
+void Identifier():
+{
+
+}
+{
+    <IDENTIFIER>
 }
