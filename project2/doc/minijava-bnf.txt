@@ -1,0 +1,67 @@
+Goal                ::=     MainClass ( ClassDeclaration )* <EOF>
+
+MainClass           ::=     "class" Identifier "{"
+                                "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{"
+                                    Statement
+                                "}"
+                            "}"
+
+ClassDeclaration    ::=     "class" Identifier ( "extends" Identifier )? "{"
+                                ( VarDeclaration )* ( MethodDeclaration )*
+                            "}"
+
+VarDeclaration      ::=     Type Identifier ";"
+
+MethodDeclaration   ::=     "public" Type Identifier "(" (
+                                Type Identifier ( "," Type Identifier )*
+                            )? ")" "{"
+                                ( VarDeclaration )* ( Statement )*
+                                "return" Expression ";"
+                            "}"
+
+Type                ::=     "int" "[" "]"
+                      |     "boolean"
+                      |     "int"
+                      |     Identifier
+
+Statement           ::=     "{" ( Statement )* "}"
+                      |     "if" "(" Expression ")" Statement ( "else" Statement )?
+                      |     "while" "(" Expression ")" Statement
+                      |     "System.out.println" "(" Expression ")" ";"
+                      |     Expression ";"
+
+Expression          ::=     AssignExpr
+
+AssignExpr          ::=     LogicOp ( "=" AssignExpr )?
+
+LogicOp             ::=     LogicOp ( "&&" | "||" ) CmpOp
+                      |     CmpOp
+
+CmpOp               ::=     CmpOp ( "<" | "<=" | "==" | "!=" | ">" | ">=" ) AddOp
+                      |     AddOp
+
+AddOp               ::=     AddOp ( "+" | "-" ) MulOp
+                      |     MulOp
+
+MulOp               ::=     MulOp ( "*" | "/" | "%" ) UnaryOp
+                      |     UnaryOp
+
+UnaryOp             ::=     "!" UnaryOp
+                      |     PostfixOp
+
+PostfixOp           ::=     PostfixOp "[" Expression "]"
+                      |     PostfixOp "." Identifier
+                                "(" ( Expression ( "," Expression )* )? ")"
+                      |     PostfixOp "." Identifier
+                      |     PrimaryExp
+
+PrimaryExp          ::=     <INTEGER_LITERAL>
+                      |     "true"
+                      |     "false"
+                      |     Identifier
+                      |     "this"
+                      |     "new" "int" "[" Expression "]"
+                      |     "new" Identifier "(" ")"
+                      |     "(" Expression ")"
+
+Identifier          ::=     <IDENTIFIER>

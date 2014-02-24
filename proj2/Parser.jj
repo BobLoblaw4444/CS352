@@ -1,0 +1,355 @@
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  STATIC = false;
+}
+
+PARSER_BEGIN(Parser)
+    package edu.purdue.cs352.minijava.parser;
+    
+    import java.util.*;
+
+    public class Parser 
+    {
+        public static void main(String[] args) 
+        {
+            Parser parser;
+
+            if (args.length != 1) 
+            {
+                System.out.println("Use: mjparse <input file>");
+                return;
+            }
+
+            try 
+            {
+                parser = new Parser(new java.io.FileInputStream(args[0]));
+            } 
+            catch (java.io.FileNotFoundException ex)
+            {
+                System.out.println("File " + args[0] + " not found.");
+                return;
+            }
+
+            try 
+            {
+                parser.Program();
+            } 
+            catch (ParseException ex)
+            {
+                System.out.println(ex.getMessage());
+                return;
+            }
+        }
+    }
+PARSER_END(Parser)
+
+// Lexical definitions
+
+// Whitespace
+SKIP :
+{
+    < " " | "\t" | "\n" | "\r" | "\f" >
+}
+
+// Comments
+SKIP :
+{
+    < "//" (~["\n"])* "\n" >
+|   < ("/*") (~["*"]|(("*")+ ~["*","/"]))*  ("*")+ "/" >
+}
+
+// MiniJava keywords
+TOKEN :
+{
+    < KW_CLASS: "class" >
+|   < KW_PUBLIC: "public" >
+|   < KW_STATIC: "static" >
+|   < KW_VOID: "void" >
+|   < KW_MAIN: "main" >
+|   < KW_STRING: "String" >
+|   < KW_EXTENDS: "extends" >
+|   < KW_RETURN: "return" >
+|   < KW_INT: "int" >
+|   < KW_BOOLEAN: "boolean" >
+|   < KW_IF: "if" >
+|   < KW_ELSE: "else" >
+|   < KW_WHILE: "while" >
+|   < KW_TRUE: "true" >
+|   < KW_FALSE: "false" >
+|   < KW_THIS: "this" >
+|   < KW_NEW: "new" >
+|   < KW_PRINT: "System.out.println" >
+}
+
+// MiniJava symbols
+TOKEN :
+{
+    < SYM_LBRACE: "{" >
+|   < SYM_RBRACE: "}" >
+|   < SYM_LPAREN: "(" >
+|   < SYM_RPAREN: ")" >
+|   < SYM_LBRACKET: "[" >
+|   < SYM_RBRACKET: "]" >
+|   < SYM_SEMICOLON: ";" >
+|   < SYM_EQUAL: "=" >
+|   < SYM_AND: "&&" >
+|   < SYM_OR: "||" >
+|   < SYM_LESS: "<" >
+|   < SYM_LESS_EQUAL: "<=" >
+|   < SYM_EQUALS: "==" >
+|   < SYM_NOT_EQUALS: "!=" >
+|   < SYM_GREATER: ">" >
+|   < SYM_GREATER_EQUALS: ">=" >
+|   < SYM_PLUS: "+" >
+|   < SYM_MINUS: "-" >
+|   < SYM_MULTIPLY: "*" >
+|   < SYM_DIVIDE: "/" >
+|   < SYM_MOD: "%" >
+|   < SYM_NOT: "!" >
+|   < SYM_DOT: "." >
+|   < SYM_COMMA: "," >
+}
+
+// Identifiers
+TOKEN :
+{
+    < IDENTIFIER: (["a"-"z"]|["A"-"Z"]|"_")(["a"-"z"]|["A"-"Z"]|["0"-"9"]|"_")* >
+}
+
+// Integer literals
+TOKEN :
+{
+    < INT_LITERAL: (["0"-"9"])+ >
+}
+
+/* The following is a simple grammar that will allow you to test the generated
+ * lexer. */
+List<Token> TokenList() :
+{
+    Token t;
+    List<Token> tl = new ArrayList<Token>();
+}
+{
+
+    (
+        t = Token()
+        { tl.add(t); }
+    )*
+    <EOF>
+    { return tl; }
+}
+
+Token Token():
+{}
+{
+    (
+    <IDENTIFIER>
+|   <INT_LITERAL>
+|   < KW_CLASS>
+|   < KW_PUBLIC>
+|   < KW_STATIC>
+|   < KW_VOID>
+|   < KW_MAIN>
+|   < KW_STRING>
+|   < KW_EXTENDS>
+|   < KW_RETURN>
+|   < KW_INT>
+|   < KW_BOOLEAN>
+|   < KW_IF>
+|   < KW_ELSE>
+|   < KW_WHILE>
+|   < KW_TRUE>
+|   < KW_FALSE>
+|   < KW_THIS>
+|   < KW_NEW>
+|   < KW_PRINT>
+|   < SYM_LBRACE>
+|   < SYM_RBRACE>
+|   < SYM_LPAREN>
+|   < SYM_RPAREN>
+|   < SYM_LBRACKET>
+|   < SYM_RBRACKET>
+|   < SYM_SEMICOLON>
+|   < SYM_EQUAL>
+|   < SYM_AND>
+|   < SYM_OR>
+|   < SYM_LESS>
+|   < SYM_LESS_EQUAL>
+|   < SYM_EQUALS>
+|   < SYM_NOT_EQUALS>
+|   < SYM_GREATER>
+|   < SYM_GREATER_EQUALS>
+|   < SYM_PLUS>
+|   < SYM_MINUS>
+|   < SYM_MULTIPLY>
+|   < SYM_DIVIDE>
+|   < SYM_MOD>
+|   < SYM_NOT>
+|   < SYM_DOT>
+|   < SYM_COMMA>
+    )
+    { return token; }
+}
+
+// Grammar
+void Program():
+{
+
+}
+{
+    MainClass() ( ClassDeclaration() )* <EOF>
+}
+
+void MainClass():
+{
+
+}
+{
+    "class" Identifier() "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier() ")" "{" (Statement())* "}" "}"
+}
+
+void ClassDeclaration():
+{
+
+}
+{
+    "class" Identifier() ( "extends" Identifier() )? "{" ( VarDeclaration() )* ( MethodDeclaration() )* "}"
+}
+
+void VarDeclaration():
+{
+
+}
+{
+    Type() Identifier() ";"
+}
+
+void MethodDeclaration():
+{
+
+}
+{
+
+    "public" Type() Identifier() "(" 
+    (
+        Type() Identifier() 
+        ( 
+            "," Type() Identifier()
+        )*
+    )? 
+    ")" "{" (LOOKAHEAD(2) VarDeclaration() )* ( Statement() )* "return" Expression() ";" "}"
+}
+
+void Type():
+{
+
+}
+{
+    LOOKAHEAD(2) "int" "[" "]"
+    |     "boolean"
+    |     "int"
+    |     Identifier()
+}
+
+void Statement():
+{
+
+}
+{
+    "{" ( Statement() )* "}"
+    |     "if" "(" Expression() ")" Statement() ( LOOKAHEAD(2) "else" Statement() )?
+    |     "while" "(" Expression() ")" Statement()
+    |     "System.out.println" "(" Expression() ")" ";"
+    |     Expression() ";"
+}
+
+void Expression():
+{
+
+}
+{
+    AssignExpr()
+}
+
+void AssignExpr():
+{
+
+}
+{
+    LogicOp() ( "=" AssignExpr() )?
+}
+
+void LogicOp():
+{
+
+}
+{
+    CmpOp() ( ( "&&" | "||" ) CmpOp() )*
+}
+
+void CmpOp():
+{
+
+}
+{
+    AddOp() ( ( "<" | "<=" | "==" | "!=" | ">" | ">=" ) AddOp() )*
+}
+
+void AddOp():
+{
+
+}
+{
+    MulOp() ( ( "+" | "-" ) MulOp() )*
+}
+
+void MulOp():
+{
+
+}
+{
+    UnaryOp() ( ( "*" | "/" | "%" ) UnaryOp() )*
+}
+
+void UnaryOp():
+{
+
+}
+{
+    "!" UnaryOp()
+    |     PostfixOp()
+}
+
+void PostfixOp():
+{
+
+}
+{
+    PrimaryExp() ("[" Expression() "]"
+    |     LOOKAHEAD(3) "." Identifier() "(" ( Expression() ( "," Expression() )* )? ")"
+    |     "." Identifier()
+         PrimaryExp())*
+}
+
+void PrimaryExp():
+{
+
+}
+{
+    <INT_LITERAL>
+    |     "true"
+    |     "false"
+    |     Identifier()
+    |     "this"
+    |     LOOKAHEAD(2) "new" "int" "[" Expression() "]"
+    |     "new" Identifier() "(" ")"
+    |     "(" Expression() ")"
+}
+
+void Identifier():
+{
+
+}
+{
+    <IDENTIFIER>
+}

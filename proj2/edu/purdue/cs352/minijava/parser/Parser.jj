@@ -205,7 +205,7 @@ void MainClass():
 
 }
 {
-    "class" Identifier() "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier() ")" "{" (Statement())* "}" "}"
+    "class" Identifier() "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier() ")" "{" Statement() "}" "}"
 }
 
 void ClassDeclaration():
@@ -325,10 +325,12 @@ void PostfixOp():
 
 }
 {
-    PrimaryExp() ("[" Expression() "]"
-    |     LOOKAHEAD(3) "." Identifier() "(" ( Expression() ( "," Expression() )* )? ")"
-    |     "." Identifier()
-         PrimaryExp())*
+    PrimaryExp() 
+    (
+        "[" Expression() "]"
+        |     LOOKAHEAD(3) "." Identifier() "(" ( Expression() ( "," Expression() )* )? ")"
+        |     "." Identifier()
+    )*
 }
 
 void PrimaryExp():
