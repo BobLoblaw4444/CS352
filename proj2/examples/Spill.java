@@ -1,6 +1,6 @@
 class Spill {
     public static void main(String[] a) {
-        System.out.println(Spiller.spill());
+        new Spiller().spill();
     }
 }
 

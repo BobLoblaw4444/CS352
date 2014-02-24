@@ -237,7 +237,9 @@ ClassDecl ClassDeclaration():
 }
 {
     "class" name = Identifier()
-        ( "extends" eggstends = Identifier() )? "{"
+        ( 
+            "extends" eggstends = Identifier() 
+        )? "{"
         (
             newVar = VarDeclaration()
             { fields.add(newVar); }
@@ -323,9 +325,10 @@ Statement Statement():
     Token t = new Token();
     Exp condition, value, exp;
     ArrayList<Statement> blockBody = new ArrayList<Statement>();
-    Statement newStatement;
     Statement body;
     Statement ifPart, elsePart = null;
+    
+    Statement newStatement;
 }
 {
     "{" ( 
@@ -457,6 +460,7 @@ Exp UnaryOp():
 {
     "!" sub = UnaryOp()
     { return new NotExp(t, sub); }
+
     |     PostfixOp()
         { return new Exp(t); }
 }
@@ -466,16 +470,18 @@ Exp PostfixOp():
     Token t = new Token();
     Exp target, index = null;
     String member = null, method = null;
-    
+
     ArrayList<Exp> arguments = new ArrayList<Exp>();
     Exp newArgument = null;
 }
 {
     target = PrimaryExp() 
     (
+        // Handle IndexExp
         "[" index = Expression() "]"
         { return new IndexExp(t, target, index); }
 
+        // Hanlde CallExp
         |     LOOKAHEAD(3) "." method = Identifier() "(" 
             ( 
                 newArgument = Expression()
@@ -487,11 +493,13 @@ Exp PostfixOp():
             )? ")"
             { return new CallExp(t, target, method, arguments); }
 
+        // Handle MemberExp
         |     "." member = Identifier()
             { return new MemberExp(t, target, member.toString()); }
     )*
     
     {
+        // No pattern matches, just return Exp
         if(index == null && member == null && newArgument == null)
         {
             return new Exp(t);
