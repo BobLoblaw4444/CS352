@@ -3,14 +3,14 @@ options {
   STATIC = false;
 }
 
-PARSER_BEGIN(Parser)
+PARSER_BEGIN(ParserAST)
     package edu.purdue.cs352.minijava.parser;
 
     import edu.purdue.cs352.minijava.ast.*;
     import edu.purdue.cs352.minijava.ASTToSExp;
     import java.util.*;
 
-    public class Parser 
+    public class ParserAST
     {
         public static void main(String[] args) 
         {
@@ -44,7 +44,7 @@ PARSER_BEGIN(Parser)
             }
         }
     }
-PARSER_END(Parser)
+PARSER_END(ParserAST)
 
 // Lexical definitions
 
@@ -353,11 +353,12 @@ Statement Statement():
 Exp Expression():
 {
     Token t = new Token();
+    Exp expr;
 }
 {
-    AssignExpr()
+    expr = AssignExpr()
     
-    { return new Exp(t); }
+    { return expr; }
 }
 
 Exp AssignExpr():
@@ -372,7 +373,7 @@ Exp AssignExpr():
         if(value != null)
             return new AssignExp(t, target, value);
         else
-            return new Exp(t);
+            return target;
     }
 }
 
@@ -380,18 +381,25 @@ Exp LogicOp():
 {
     Token op = new Token();
     Exp left, right = null;
+    BinaryExp last = null;
 }
 {
     left = CmpOp() 
     (
         (op = "&&" | op = "||" ) right = CmpOp()
-        { return new BinaryExp(left, op, right); }
-        { left = right; }
+        {
+            if(last == null)
+                last = new BinaryExp(left, op, right);
+            else
+                last = new BinaryExp(last, op, right);
+        }
     )*
     
     {
         if(right == null)
-            return new Exp(op);
+            return left;
+        else
+            return last;
     }
 }
 
@@ -399,18 +407,25 @@ Exp CmpOp():
 {
     Token op = new Token();
     Exp left, right = null;
+    BinaryExp last = null;
 }
 {
     left = AddOp() 
     ( 
         (op = "<" | op = "<=" | op = "==" | op = "!=" | op = ">" | op = ">=" ) right = AddOp()
-        { return new BinaryExp(left, op, right); }
-        { left = right; }
+        {
+            if(last == null)
+                last = new BinaryExp(left, op, right);
+            else
+                last = new BinaryExp(last, op, right);
+        }
     )*
     
     {
         if(right == null)
-            return new Exp(op);
+            return left;
+        else
+            return last;
     }
 }
 
@@ -418,18 +433,25 @@ Exp AddOp():
 {
     Token op = new Token();
     Exp left, right = null;
+    BinaryExp last = null;
 }
 {
     left = MulOp() 
     ( 
         ( op = "+" | op = "-" ) right = MulOp()
-        { return new BinaryExp(left, op, right); }
-        { left = right; }
+        {
+            if(last == null)
+                last = new BinaryExp(left, op, right);
+            else
+                last = new BinaryExp(last, op, right);
+        }
     )*
     
     {
         if(right == null)
-            return new Exp(op);
+            return left;
+        else
+            return last;
     }
 }
 
@@ -437,18 +459,25 @@ Exp MulOp():
 {
     Token op = new Token();
     Exp left, right = null;
+    BinaryExp last = null;
 }
 {
     left = UnaryOp()
     ( 
         ( op = "*" | op = "/" | op = "%" ) right = UnaryOp()
-        { return new BinaryExp(left, op, right); }
-        { left = right; }
+        {
+            if(last == null)
+                last = new BinaryExp(left, op, right);
+            else
+                last = new BinaryExp(last, op, right);
+        }
     )*
     
     {
         if(right == null)
-            return new Exp(op);
+            return left;
+        else
+            return last;
     }
 }
 
@@ -461,8 +490,8 @@ Exp UnaryOp():
     "!" sub = UnaryOp()
     { return new NotExp(t, sub); }
 
-    |     PostfixOp()
-        { return new Exp(t); }
+    |     sub = PostfixOp()
+        { return sub; }
 }
 
 Exp PostfixOp():
@@ -481,7 +510,7 @@ Exp PostfixOp():
         "[" index = Expression() "]"
         { return new IndexExp(t, target, index); }
 
-        // Hanlde CallExp
+        // Handle CallExp
         |     LOOKAHEAD(3) "." method = Identifier() "(" 
             ( 
                 newArgument = Expression()
@@ -502,7 +531,7 @@ Exp PostfixOp():
         // No pattern matches, just return Exp
         if(index == null && member == null && newArgument == null)
         {
-            return new Exp(t);
+            return target;
         }
     }
 }
@@ -513,6 +542,7 @@ Exp PrimaryExp():
     Token value;
     String name;
     Exp size;
+    Exp expr;
 }
 {
     value = <INT_LITERAL>
@@ -523,8 +553,8 @@ Exp PrimaryExp():
     |     value = "false"
         { return new BooleanLiteralExp(t, Boolean.valueOf(value.toString())); }
 
-    |     Identifier()
-        { return new Exp(t); }
+    |     name = Identifier()
+        { return new VarExp(t, name); }
 
     |     "this"
         { return new ThisExp(t); }
@@ -535,8 +565,8 @@ Exp PrimaryExp():
     |     "new" name = Identifier() "(" ")"
         { return new NewObjectExp(t, name); }
 
-    |     "(" Expression() ")"
-        { return new Exp(t);}
+    |     "(" expr = Expression() ")"
+        { return expr;}
 }
 
 String Identifier():
