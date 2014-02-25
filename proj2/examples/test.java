@@ -14,7 +14,7 @@ class BS{
     // Invoke methods to initialize, print and search
     // for elements on the array
     public int Start(int sz){
-        sz = 5 || 2 || 3;
+        sz = 5 + 2 + 3;
 
 	return sz ;
     }

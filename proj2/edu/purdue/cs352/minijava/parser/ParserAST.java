@@ -9,7 +9,7 @@
     public class ParserAST implements ParserASTConstants {
         public static void main(String[] args)
         {
-            Parser parser;
+            ParserAST parser;
 
             if (args.length != 1)
             {
@@ -19,7 +19,7 @@
 
             try
             {
-                parser = new Parser(new java.io.FileInputStream(args[0]));
+                parser = new ParserAST(new java.io.FileInputStream(args[0]));
             }
             catch (java.io.FileNotFoundException ex)
             {
