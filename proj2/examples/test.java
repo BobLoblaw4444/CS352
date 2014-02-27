@@ -15,6 +15,7 @@ class BS{
     // for elements on the array
     public int Start(int sz){
         sz = 5 + 2 + 3;
+        number[4].val = 9;
 
 	return sz ;
     }

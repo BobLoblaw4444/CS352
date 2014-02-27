@@ -500,6 +500,8 @@ Exp PostfixOp():
     Exp target, index = null;
     String member = null, method = null;
 
+    Exp last = null;
+
     ArrayList<Exp> arguments = new ArrayList<Exp>();
     Exp newArgument = null;
 }
@@ -508,7 +510,12 @@ Exp PostfixOp():
     (
         // Handle IndexExp
         "[" index = Expression() "]"
-        { return new IndexExp(t, target, index); }
+        {
+            if(last == null)
+                last = new IndexExp(t, target, index);
+            else
+                last = new IndexExp(t, last, index);
+        }
 
         // Handle CallExp
         |     LOOKAHEAD(3) "." method = Identifier() "(" 
@@ -520,19 +527,29 @@ Exp PostfixOp():
                     { arguments.add(newArgument); }
                 )* 
             )? ")"
-            { return new CallExp(t, target, method, arguments); }
+            {
+                if(last == null)
+                    last = new CallExp(t, target, method, arguments);
+                else
+                    last = new CallExp(t, last, method, arguments);
+            }
 
         // Handle MemberExp
         |     "." member = Identifier()
-            { return new MemberExp(t, target, member.toString()); }
+            {
+                if(last == null)
+                    last = new MemberExp(t, target, member.toString());
+                else
+                    last = new MemberExp(t, last, member.toString());
+            }
     )*
     
     {
-        // No pattern matches, just return Exp
-        if(index == null && member == null && newArgument == null)
-        {
+        // If no pattern matches, just return target. Otherwise return the subtree
+        if(last == null)
             return target;
-        }
+        else
+            return last;
     }
 }
 
