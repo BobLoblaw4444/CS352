@@ -14,6 +14,9 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     // Create a field for local variables (symbol table)
     HashMap<String, SSAStatement> symbolTable = new HashMap<String, SSAStatement>();
 
+    // Global position counter for parameters
+    public static int pos = 0;
+
     public static SSAProgram compile(Program prog)
     {
         SSAMethod main = compile(prog.getMain());
@@ -48,27 +51,22 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         SSACompiler compiler = new SSACompiler();
 
         // visit the parameters
-	ArrayList<SSAStatement> parameters = new ArrayList<SSAStatement>();
-	int pos = 0;
-
         for(Parameter para : method.getParameters())
 	{
-	    parameters.add(new SSAStatement(para, SSAStatement.Op.Parameter, pos));
-	    pos++;
+	    para.accept(compiler);
 	}
 
+	// Reset position for next parameter list
+	pos = 0;
+
         // and the variable declarations
-	int idx = 0;
-	ArrayList<SSAField> variables = new ArrayList<SSAField>();
         for(VarDecl var : method.getVarDecls())
 	{
 	    var.accept(compiler);
-	    //variables.add(new SSAField(var, var.getName(), idx));
-	    //idx++;
 	}
 
         // then compile the body
-        ArrayList<SSAStatement> body = new ArrayList<SSAStatement>();
+        //ArrayList<SSAStatement> body = new ArrayList<SSAStatement>();
 	for(Statement statement : method.getBody())
 	    statement.accept(compiler);
 
@@ -104,6 +102,17 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     }
 */
 
+    @Override public Object visit(Parameter param)
+    {
+	SSAStatement ret = new SSAStatement(param, SSAStatement.Op.Parameter, this.pos);
+	
+	this.symbolTable.put(param.getName(), ret);
+
+	this.body.add(ret);
+	pos++;
+	return ret;
+    }
+
     @Override public Object visit(VarDecl varDecl)
     {
 	SSAStatement ret;
@@ -132,11 +141,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	}
 	else if(exp instanceof BinaryExp)
 	{
-	    SSAStatement left = (SSAStatement)((BinaryExp)exp).getLeft().accept(this);
-	    SSAStatement right = (SSAStatement)((BinaryExp)exp).getRight().accept(this);
-	    SSAStatement.Op op = determineOp(((BinaryExp)exp).getOp());
-
-	    ret = new SSAStatement(exp, op, left, right);
+	    ret = (SSAStatement)((BinaryExp)exp).accept(this);
 	}
 	else if(exp instanceof IntLiteralExp)
 	{
@@ -146,7 +151,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         {
             throw new Error("Invalid Expression: " + exp.getClass().getSimpleName());
         }
-	this.body.add(ret);
+
 	return ret;
     }
 
@@ -209,6 +214,20 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
 	this.body.add(ret);
         return ret;
+    }
+
+    @Override public Object visit(BinaryExp binExp)
+    {
+	SSAStatement ret;
+	
+	SSAStatement left = (SSAStatement)(binExp.getLeft().accept(this));
+	SSAStatement right = (SSAStatement)(binExp.getRight().accept(this));
+	SSAStatement.Op op = determineOp(binExp.getOp());
+
+	ret = new SSAStatement(binExp, op, left, right);
+
+	this.body.add(ret);
+	return ret;
     }
 
     // CallExp
@@ -297,7 +316,6 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
     public void compileReturn(Exp retExp)
     {
-        // ...
 	SSAStatement ret;
 
 	ret = new SSAStatement(retExp, SSAStatement.Op.Return, (SSAStatement)retExp.accept(this) , null, null);
