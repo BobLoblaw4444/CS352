@@ -12,7 +12,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     List<SSAStatement> body = new ArrayList<SSAStatement>();
 
     // Create a field for local variables (symbol table)
-    HashMap<String, SSAField> symbols = new HashMap<String, SSAField>();
+    HashMap<String, SSAStatement> symbolTable = new HashMap<String, SSAStatement>();
 
     public static SSAProgram compile(Program prog)
     {
@@ -58,11 +58,15 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	}
 
         // and the variable declarations
-	ArrayList<SSAStatement> variables = new ArrayList<SSAStatement>();
+	int idx = 0;
+	ArrayList<SSAField> variables = new ArrayList<SSAField>();
         for(VarDecl var : method.getVarDecls())
 	{
-	    //variables.add(visit(var.));
+	    var.accept(compiler);
+	    //variables.add(new SSAField(var, var.getName(), idx));
+	    //idx++;
 	}
+
         // then compile the body
         ArrayList<SSAStatement> body = new ArrayList<SSAStatement>();
 	for(Statement statement : method.getBody())
@@ -100,6 +104,18 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     }
 */
 
+    @Override public Object visit(VarDecl varDecl)
+    {
+	SSAStatement ret;
+
+	ret = new SSAStatement(varDecl, SSAStatement.Op.Null, varDecl.getType());
+	
+	symbolTable.put(varDecl.getName(), ret);
+	
+	this.body.add(ret);
+	return ret;
+    }
+
     @Override public Object visit(ExpStatement expStatement)
     {
 	return expStatement.getExp().accept(this);
@@ -112,24 +128,25 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
 	if(exp instanceof AssignExp)
 	{
-	    ret = (SSAStatement)visit(((AssignExp)exp));
+	    ret = (SSAStatement)((AssignExp)exp).accept(this);
 	}
 	else if(exp instanceof BinaryExp)
 	{
-	    SSAStatement left = (SSAStatement)visit(((BinaryExp)exp).getLeft());
-	    SSAStatement right = (SSAStatement)visit(((BinaryExp)exp).getRight());
+	    SSAStatement left = (SSAStatement)((BinaryExp)exp).getLeft().accept(this);
+	    SSAStatement right = (SSAStatement)((BinaryExp)exp).getRight().accept(this);
 	    SSAStatement.Op op = determineOp(((BinaryExp)exp).getOp());
 
 	    ret = new SSAStatement(exp, op, left, right);
 	}
 	else if(exp instanceof IntLiteralExp)
 	{
-	    ret = new SSAStatement(exp, SSAStatement.Op.Int, null, null, ((IntLiteralExp)exp).getValue());
+	    ret = (SSAStatement)((IntLiteralExp)exp).accept(this);
 	}
 	else
         {
             throw new Error("Invalid Expression: " + exp.getClass().getSimpleName());
         }
+	this.body.add(ret);
 	return ret;
     }
 
@@ -140,15 +157,16 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	
 	if(statement instanceof PrintStatement)
 	{
-	    SSAStatement value = (SSAStatement)visit(((PrintStatement)statement).getValue());
+	    SSAStatement value = (SSAStatement)((PrintStatement)statement).getValue().accept(this);
 	
-	    ret = new SSAStatement(statement, SSAStatement.Op.Print, value);
+	    ret = new SSAStatement(statement, SSAStatement.Op.Print, value, null, null);
 	}
 	else
         {
             throw new Error("Invalid Statement: " + statement.getClass().getSimpleName());
         }
 
+	this.body.add(ret);
 	return ret;
 
     }
@@ -157,7 +175,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     {
         // what sort of statement we make, if any, depends on the LHS
         Exp target = exp.getTarget();
-	SSAStatement value = (SSAStatement)visit(exp.getValue());
+	SSAStatement value = (SSAStatement)exp.getValue().accept(this);
         SSAStatement ret;
         
 	if (target instanceof VarExp)
@@ -165,24 +183,22 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    String name = ((VarExp)target).getName();
 
 	    ret = new SSAStatement(exp, SSAStatement.Op.VarAssg, value, null, name);            
-
+	    
+	    this.symbolTable.put(name, ret);
         }
         else if (target instanceof MemberExp)
         {
 	    String name = ((MemberExp)target).getMember();
 	   
-
-	    SSAStatement member = (SSAStatement)visit(((MemberExp)target).getSub());
+	    SSAStatement member = (SSAStatement)((MemberExp)target).getSub().accept(this);
 
             ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, member, value, name);
 
         }
         else if (target instanceof IndexExp)
         {
-	    SSAStatement array = (SSAStatement)visit(((IndexExp)target).getTarget());
-
-	    SSAStatement index = (SSAStatement)visit(((IndexExp)target).getIndex());	    
-
+	    SSAStatement array = (SSAStatement)((IndexExp)target).getTarget().accept(this);
+	    SSAStatement index = (SSAStatement)((IndexExp)target).getIndex().accept(this);	    
             ret = new SSAStatement(exp, SSAStatement.Op.IndexAssg, array, value, index);
 
         }
@@ -191,19 +207,102 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
             throw new Error("Invalid LHS: " + target.getClass().getSimpleName());
         }
 
+	this.body.add(ret);
         return ret;
     }
-/*    @Override public Object visit(VarExp exp)
+
+    // CallExp
+    @Override public Object visit(CallExp callExp)
     {
-	
+	SSAStatement ret;
+
+	SSAStatement target = (SSAStatement)(callExp.getTarget().accept(this));
+
+	// Build an SSAStatement argument list from Exp list
+	ArrayList<SSAStatement> args = new ArrayList<SSAStatement>();
+	for(Exp argument : callExp.getArguments())
+	{
+	    args.add((SSAStatement)argument.accept(this));
+	}
+
+	SSACall ssaCall = new SSACall(callExp.getMethod(), args);
+
+	ret = new SSAStatement(callExp, SSAStatement.Op.Call, target, null, ssaCall);
+
+	this.body.add(ret);
+	return ret;
     }
-*/
+
+    // IntLiteral
+    @Override public Object visit(IntLiteralExp intLit)
+    {
+	SSAStatement ret = new SSAStatement(intLit, SSAStatement.Op.Int, intLit.getValue());
+	
+	this.body.add(ret);
+	return ret;
+    }
+
+    // BooleanLiteral
+    @Override public Object visit(BooleanLiteralExp boolLit)
+    {
+	SSAStatement ret = new SSAStatement(boolLit, SSAStatement.Op.Boolean, boolLit.getValue());
+	
+	this.body.add(ret);
+	return ret;
+    }
+
+    // VarExp
+    @Override public Object visit(VarExp var)
+    {
+	SSAStatement ret = this.symbolTable.get(var.getName());
+	
+	if(ret == null)
+	{ 
+	    ret = new SSAStatement(var, SSAStatement.Op.Null, var.getName());
+	   
+	    
+	    this.body.add(ret);
+	}
+	
+	return ret;
+    }
+
+    // This
+    @Override public Object visit(ThisExp thisExp)
+    {
+	SSAStatement ret = new SSAStatement(thisExp, SSAStatement.Op.This, null);
+	
+	this.body.add(ret);
+	return ret;
+    }
+
+    // NewIntArray
+    @Override public Object visit(NewIntArrayExp intArray)
+    {
+	SSAStatement size = (SSAStatement)(intArray.getSize().accept(this));
+	SSAStatement ret = new SSAStatement(intArray, SSAStatement.Op.NewIntArray, size, null, null);
+	
+	this.body.add(ret);
+	return ret;
+    }
+
+    // NewObject
+    @Override public Object visit(NewObjectExp newObj)
+    {
+	SSAStatement ret = new SSAStatement(newObj, SSAStatement.Op.NewObj, newObj.getName());
+	
+	this.body.add(ret);
+	return ret;
+    }
 
     public void compileReturn(Exp retExp)
     {
         // ...
-	retExp.accept(this);
+	SSAStatement ret;
+
+	ret = new SSAStatement(retExp, SSAStatement.Op.Return, (SSAStatement)retExp.accept(this) , null, null);
 	
+	this.body.add(ret);
     }
 
     private SSAStatement.Op determineOp(Token op)
