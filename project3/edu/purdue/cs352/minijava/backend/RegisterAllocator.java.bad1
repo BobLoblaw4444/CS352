@@ -1,0 +1,130 @@
+package edu.purdue.cs352.minijava.backend;
+
+import java.util.*;
+
+import edu.purdue.cs352.minijava.ssa.*;
+
+public class RegisterAllocator {
+    private static class AllocatorState {
+        public Map<SSAStatement, Integer> stmtMap;
+        public int[] aliasMap,
+                     // first and last use of each statement (map statement->use)
+                     first, last;
+        // first and last uses at each statement (map statement->uses)
+        public List<SSAStatement>[] firstUses, lastUses;
+
+        public AllocatorState(int blockLen) {
+            stmtMap = new HashMap<SSAStatement, Integer>();
+            aliasMap = new int[blockLen];
+            first = new int[blockLen];
+            last = new int[blockLen];
+            firstUses = new List<Integer>[blockLen];
+            lastUses = new List<Integer>[blockLen];
+
+            Arrays.fill(first, blockLen);
+            Arrays.fill(last, blockLen);
+        }
+
+        // Utility function to unify or alias in the alias map
+        public void unifyOrAlias(int target, SSAStatement s, SSAStatement[] block, Map<SSAStatement, Integer> stmtMap, int aliasMap[]) {
+            SSAStatement l = s.getLeft();
+            SSAStatement r = s.getRight();
+
+            aliasMap[stmtMap.get(s)] = target;
+
+            switch (s.getOp()) {
+                case Unify:
+                    unifyOrAlias(target, r, block, stmtMap, aliasMap);
+                    // fall thru
+
+                case Alias:
+                    unifyOrAlias(target, l, block, stmtMap, aliasMap);
+            }
+        }
+
+        // Utility function to fill first/last for this statement
+        public void fillFirstLast(int i, SSAStatement s) {
+            fillFirstLastPrime(i, s);
+
+            SSAStatement l = s.getLeft(),
+                         r = s.getRight();
+            if (l != null) fillFirstLastPrime(i, l);
+            if (r != null) fillFirstLastPrime(i, r);
+
+            // special for Call
+            if (s.getOp() == SSAStatement.Op.Call) {
+                SSACall call = (SSACall) s.getSpecial();
+                for (SSAStatement arg : call.getArgs()) {
+                    fillFirstLastPrime(i, arg);
+                }
+            }
+        }
+
+        private void fillFirstLastPrime(int i, SSAStatement s) {
+            int si = aliasMap[stmtMap.get(s)];
+            if (i < first[si]) first[si] = i;
+            if (i > last[si]) last[si] = i;
+        }
+
+        // Utility function to fill firstUses/lastUses from first/last
+        public void fillFirstLastUses() {
+            int i;
+            for (i = 0; i < first.length; i++) {
+                firstUses[i] = new ArrayList<SSAStatement>();
+                lastUses[i] = new ArrayList<SSAStatement>();
+            }
+            for (i = 0; i < first.length; i++) {
+                if (first[i] < first.length)
+                    firstUses[first[i]].add(i)
+                if (last[i] > -1)
+                    lastUses[last[i]].add(i);
+            }
+        }
+    }
+
+    // the register allocator itself
+    public static RegisterAllocatedBlock alloc(List<SSAStatement> lBlock, int freeRegisters) {
+        int i, spill = 0;
+
+        while (true) {
+            SSAStatement[] block = lBlock.toArray(new SSAStatement[0]);
+            AllocatorState as = new AllocatorState(block.length);
+
+            // map of SSAStatements to their index in block
+            Map<SSAStatement, Integer> stmtMap = as.stmtMap;
+
+            // and map of indexes to their canonical (aliased or unified) version
+            int[] aliasMap = as.aliasMap;
+
+            // start the maps
+            for (i = 0; i < block.length; i++) {
+                SSAStatement s = block[i];
+                stmtMap.put(s, i);
+                aliasMap[i] = i;
+            }
+
+            // unify and alias
+            for (i = 0; i < block.length; i++) {
+                as.unifyOrAlias(i, block[i], block);
+            }
+
+            // now find the first and last use of each
+            int first[] = as.first;
+            int last[] = as.last;
+            for (i = 0; i < block.length; i++) {
+                as.fillFirstLast(i, block[i]);
+            }
+
+            // and look for conflicts
+            Set<Integer> alive = new HashSet<Integer>();
+            for (i = 0; i < block.length; i++) {
+                // first add all the first-uses
+                for (Integer fi : as.firstUses[i])
+                    alive.add(fi);
+
+                // now see if we have a problem
+                if (alive.size() > freeRegisters) {
+                    // too many things in use, need to spill!
+        }
+    }
+}

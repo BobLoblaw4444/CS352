@@ -1,0 +1,20 @@
+Symbols:
+    { } ( ) [ ] ; = && || < <= == != > >= + - * / % ! . ,
+
+Keywords:
+    class public static void main String extends return int boolean if else
+    while true false this new
+    System.out.println
+
+Identifiers:
+    ([A-Z]|[a-z]|_)([A-Z]|[a-z]|[0-9]|_)*
+
+Literals:
+    [0-9]+
+
+Whitespace:
+    ( |\t|\n|\r|\f)+
+
+Comments:
+    //[^\n]*\n
+    /\*([^\*]|\*+[^\*/])*\*+/
