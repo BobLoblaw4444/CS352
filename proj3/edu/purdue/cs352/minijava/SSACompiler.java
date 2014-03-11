@@ -66,7 +66,6 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	}
 
         // then compile the body
-        //ArrayList<SSAStatement> body = new ArrayList<SSAStatement>();
 	for(Statement statement : method.getBody())
 	    statement.accept(compiler);
 
@@ -81,29 +80,10 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         throw new Error("Unsupported visitor in SSACompiler: " + node.getClass().getSimpleName());
     }
 
-    // ...
-
-  /*  @Override public Object visit(PostfixOp postfix)
-    {
-	 // what sort of statement we make, if any, depends on the LHS
-        SSAStatement ret;
-	
-	if(postfix instanceof )
-	{
-	    SSAStatement temp = new SSAStatement(statement, SSAStatement.Op.Int, 12);
-	
-	    return new SSAStatement(statement, SSAStatement.Op.Print, temp);
-	}
-	else
-        {
-            throw new Error("Invalid LHS: " + statement.getClass().getSimpleName());
-        }
-
-    }
-*/
-
+    // Parameters
     @Override public Object visit(Parameter param)
     {
+	
 	SSAStatement ret = new SSAStatement(param, SSAStatement.Op.Parameter, this.pos);
 	
 	this.symbolTable.put(param.getName(), ret);
@@ -113,6 +93,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	return ret;
     }
 
+    // VarDecl
     @Override public Object visit(VarDecl varDecl)
     {
 	SSAStatement ret;
@@ -125,11 +106,14 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	return ret;
     }
 
+    // ExpStatement
     @Override public Object visit(ExpStatement expStatement)
     {
 	return expStatement.getExp().accept(this);
 
     }
+
+    // Exp
     @Override public Object visit(Exp exp)
     {   
 	//Exp exp = expStatement.getExp();
@@ -155,27 +139,139 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	return ret;
     }
 
+    // BlockStatement
+    @Override public Object visit(BlockStatement block)
+    {
+	for (Statement stmt : block.getBody())
+	    stmt.accept(this);
+
+	return null;
+    }
+
+    // IfStatement
+    @Override public Object visit(IfStatement ifStatement)
+    {
+	SSAStatement ret = null;
+
+	// Create temporary compiler to keep track of symbolTable
+	SSACompiler temp = new SSACompiler();
+	temp.symbolTable = new HashMap<String, SSAStatement>(this.symbolTable);
+
+	// Condition
+	SSAStatement condition = (SSAStatement)ifStatement.getCondition().accept(this);
+
+	// Not Branch
+	SSAStatement notBranch = new SSAStatement(ifStatement, SSAStatement.Op.NBranch, condition, null);
+	this.body.add(notBranch);
+
+	// If Part
+	SSAStatement ifPart = (SSAStatement)ifStatement.getIfPart().accept(this);
+	
+	// Goto Statement
+	SSAStatement gotoStatement = new SSAStatement(ifStatement, SSAStatement.Op.Goto);
+	this.body.add(gotoStatement);
+
+	// Else Label
+	SSAStatement elseLabel = new SSAStatement(ifStatement, SSAStatement.Op.Label, "Else");
+	this.body.add(elseLabel);
+
+	// Else Part
+	SSAStatement elsePart = (SSAStatement)ifStatement.getElsePart().accept(temp);
+
+	// Add the temp body back to this body
+	for(SSAStatement ssa : temp.getBody())
+	    this.body.add(ssa);
+
+	// Final Label
+	SSAStatement finalLabel = new SSAStatement(ifStatement, SSAStatement.Op.Label, "Final");
+	this.body.add(finalLabel);
+
+	// Set special fields of statements that were declared before these existed
+	notBranch.setSpecial(elseLabel.getSpecial());
+	gotoStatement.setSpecial(finalLabel.getSpecial());
+
+	// Unify
+	for (Map.Entry<String, SSAStatement> sym : (this.symbolTable).entrySet())
+	{
+	    SSAStatement originalEntry = sym.getValue();
+	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
+	    
+	    if(originalEntry.getIndex() != newEntry.getIndex())
+	    {
+		SSAStatement unify = new SSAStatement(ifStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
+		this.body.add(unify);
+		ret = unify;
+	    }
+	}	
+	
+	return ret;
+    }
+
+    // While Statement
+    @Override public Object visit(WhileStatement whileStatement)
+    {
+	SSACompiler temp = new SSACompiler();
+	temp.symbolTable = new HashMap<String, SSAStatement>(this.symbolTable);
+
+
+	// Condition Label
+	SSAStatement conditionLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, "Condition");
+	this.body.add(conditionLabel);
+	
+	// Condition
+	SSAStatement condition = (SSAStatement)whileStatement.getCondition().accept(this);
+
+	// Not Branch
+	SSAStatement notBranch = new SSAStatement(whileStatement, SSAStatement.Op.NBranch, condition, null);
+	this.body.add(notBranch);
+
+	// Loop Body
+	SSAStatement body = (SSAStatement)whileStatement.getBody().accept(temp);
+	
+	// Add the temp body back to this body
+	for(SSAStatement ssa : temp.getBody())
+	    this.body.add(ssa);
+
+	// Goto Statement
+	SSAStatement gotoStatement = new SSAStatement(whileStatement, SSAStatement.Op.Goto, conditionLabel.getSpecial());
+	this.body.add(gotoStatement);
+
+	// Final Label
+	SSAStatement finalLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, "End");
+	this.body.add(finalLabel);
+
+	notBranch.setSpecial(finalLabel.getSpecial());
+
+	for (Map.Entry<String, SSAStatement> sym : (this.symbolTable).entrySet())
+	{
+	    SSAStatement originalEntry = sym.getValue();
+	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
+	    
+	    if(originalEntry.getIndex() != newEntry.getIndex())
+	    {
+		SSAStatement unify = new SSAStatement(whileStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
+		this.body.add(unify);
+	    }
+	}
+
+	return conditionLabel;
+    }
+
+    // PrintStatement
     @Override public Object visit(PrintStatement statement)
     {
-	 // what sort of statement we make, if any, depends on the LHS
         SSAStatement ret;
 	
-	if(statement instanceof PrintStatement)
-	{
-	    SSAStatement value = (SSAStatement)((PrintStatement)statement).getValue().accept(this);
+	SSAStatement value = (SSAStatement)((PrintStatement)statement).getValue().accept(this);
 	
-	    ret = new SSAStatement(statement, SSAStatement.Op.Print, value, null, null);
-	}
-	else
-        {
-            throw new Error("Invalid Statement: " + statement.getClass().getSimpleName());
-        }
+	ret = new SSAStatement(statement, SSAStatement.Op.Print, value, null, null);
 
 	this.body.add(ret);
 	return ret;
 
     }
 
+    // Assign Expression
     @Override public Object visit(AssignExp exp)
     {
         // what sort of statement we make, if any, depends on the LHS
@@ -183,6 +279,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	SSAStatement value = (SSAStatement)exp.getValue().accept(this);
         SSAStatement ret;
         
+	// Assign to variable
 	if (target instanceof VarExp)
         { 
 	    String name = ((VarExp)target).getName();
@@ -191,6 +288,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    
 	    this.symbolTable.put(name, ret);
         }
+	// Assign to member
         else if (target instanceof MemberExp)
         {
 	    String name = ((MemberExp)target).getMember();
@@ -200,6 +298,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
             ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, member, value, name);
 
         }
+	// Assign to array
         else if (target instanceof IndexExp)
         {
 	    SSAStatement array = (SSAStatement)((IndexExp)target).getTarget().accept(this);
@@ -216,6 +315,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         return ret;
     }
 
+    // Binary Expression
     @Override public Object visit(BinaryExp binExp)
     {
 	SSAStatement ret;
@@ -230,6 +330,23 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	return ret;
     }
 
+    // NotExp
+    @Override public Object visit(NotExp not)
+    {
+	SSAStatement ret = new SSAStatement(not, SSAStatement.Op.Not, (SSAStatement)not.getSub().accept(this), null);
+
+	this.body.add(ret);
+	return ret;
+    }
+    // IndexExp
+    @Override public Object visit(IndexExp indexExp)
+    {
+	SSAStatement ret = new SSAStatement(indexExp, SSAStatement.Op.Index, (SSAStatement)indexExp.getTarget().accept(this), (SSAStatement)indexExp.getIndex().accept(this));
+
+	this.body.add(ret);
+	return ret;
+    }
+
     // CallExp
     @Override public Object visit(CallExp callExp)
     {
@@ -239,14 +356,27 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
 	// Build an SSAStatement argument list from Exp list
 	ArrayList<SSAStatement> args = new ArrayList<SSAStatement>();
+	int index = 0;
 	for(Exp argument : callExp.getArguments())
 	{
-	    args.add((SSAStatement)argument.accept(this));
+	    SSAStatement arg = new SSAStatement(callExp, SSAStatement.Op.Arg, (SSAStatement)argument.accept(this), null, index);
+	    args.add(arg);
+	    this.body.add(arg);
+	    index++;
 	}
 
 	SSACall ssaCall = new SSACall(callExp.getMethod(), args);
 
 	ret = new SSAStatement(callExp, SSAStatement.Op.Call, target, null, ssaCall);
+
+	this.body.add(ret);
+	return ret;
+    }
+
+    // MemberExp
+    @Override public Object visit(MemberExp member)
+    {
+	SSAStatement ret = new SSAStatement(member, SSAStatement.Op.Member, (SSAStatement)member.getSub().accept(this), null, member.getMember());
 
 	this.body.add(ret);
 	return ret;
@@ -314,6 +444,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	return ret;
     }
 
+    // Return
     public void compileReturn(Exp retExp)
     {
 	SSAStatement ret;
@@ -323,6 +454,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	this.body.add(ret);
     }
 
+    // Convert operation tokens to enums
     private SSAStatement.Op determineOp(Token op)
     {
 	String symbol = op.toString();
