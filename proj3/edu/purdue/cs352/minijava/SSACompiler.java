@@ -54,12 +54,17 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	ArrayList<SSAStatement> parameters = new ArrayList<SSAStatement>();
         for(Parameter para : method.getParameters())
 	{
+	    //para.accept(compiler);
 	    parameters.add((SSAStatement)para.accept(compiler));
 	}
 
 	for(SSAStatement param : parameters)
 	{
-	    compiler.body.add(new SSAStatement(method, SSAStatement.Op.VarAssg, param, null, ((Parameter)param.getASTNode()).getName()));
+	    String name = ((Parameter)param.getASTNode()).getName();
+	    SSAStatement varAssg = new SSAStatement(method, SSAStatement.Op.VarAssg, param, null, name);
+
+	    compiler.symbolTable.put(name, varAssg);
+	    compiler.body.add(varAssg);
 	}
 
 	// Reset position for next parameter list
@@ -92,7 +97,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	
 	SSAStatement ret = new SSAStatement(param, SSAStatement.Op.Parameter, this.pos);
 	
-	this.symbolTable.put(param.getName(), ret);
+	//this.symbolTable.put(param.getName(), ret);
 
 	this.body.add(ret);
 	
@@ -159,6 +164,9 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(IfStatement ifStatement)
     {
 	SSAStatement ret = null;
+	
+	// Get current time to make sure to avoid label collisions
+	long currTime = System.nanoTime() / 1000;
 
 	// Create temporary compiler to keep track of symbolTable
 	SSACompiler temp = new SSACompiler();
@@ -179,7 +187,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	this.body.add(gotoStatement);
 
 	// Else Label
-	SSAStatement elseLabel = new SSAStatement(ifStatement, SSAStatement.Op.Label, "Else");
+	SSAStatement elseLabel = new SSAStatement(ifStatement, SSAStatement.Op.Label, ("IfElse-" + currTime));
 	this.body.add(elseLabel);
 
 	// Else Part
@@ -190,7 +198,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    this.body.add(ssa);
 
 	// Final Label
-	SSAStatement finalLabel = new SSAStatement(ifStatement, SSAStatement.Op.Label, "Final");
+	SSAStatement finalLabel = new SSAStatement(ifStatement, SSAStatement.Op.Label, "IfFinal-" + currTime);
 	this.body.add(finalLabel);
 
 	// Set special fields of statements that were declared before these existed
@@ -230,9 +238,11 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	SSACompiler temp = new SSACompiler();
 	temp.symbolTable = new HashMap<String, SSAStatement>(this.symbolTable);
 
+	// Get current time to make sure to avoid label collisions
+	long currTime = System.nanoTime() / 1000;
 
 	// Condition Label
-	SSAStatement conditionLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, "Condition");
+	SSAStatement conditionLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, ("WhileCondition-" + currTime));
 	this.body.add(conditionLabel);
 	
 	// Condition
@@ -254,7 +264,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	this.body.add(gotoStatement);
 
 	// Final Label
-	SSAStatement finalLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, "End");
+	SSAStatement finalLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, ("WhileEnd-" + currTime));
 	this.body.add(finalLabel);
 
 	notBranch.setSpecial(finalLabel.getSpecial());
@@ -294,7 +304,6 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     {
         // what sort of statement we make, if any, depends on the LHS
         Exp target = exp.getTarget();
-	SSAStatement value = (SSAStatement)exp.getValue().accept(this);
         SSAStatement ret;
         
 	// Assign to variable
@@ -307,10 +316,12 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 		SSAStatement thisExp = new SSAStatement(exp, SSAStatement.Op.This, null);
 		this.body.add(thisExp);
 
+		SSAStatement value = (SSAStatement)exp.getValue().accept(this);
 		ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, thisExp, value, name);
 	    }
 	    else
 	    {
+		SSAStatement value = (SSAStatement)exp.getValue().accept(this);
 		ret = new SSAStatement(exp, SSAStatement.Op.VarAssg, value, null, name);            
 		this.symbolTable.put(name, ret);
 	    }
@@ -322,6 +333,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	   
 	    SSAStatement member = (SSAStatement)((MemberExp)target).getSub().accept(this);
 
+	    SSAStatement value = (SSAStatement)exp.getValue().accept(this);
             ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, member.getLeft(), value, name);
 
         }
@@ -330,8 +342,9 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         {
 	    SSAStatement array = (SSAStatement)((IndexExp)target).getTarget().accept(this);
 	    SSAStatement index = (SSAStatement)((IndexExp)target).getIndex().accept(this);	    
-            ret = new SSAStatement(exp, SSAStatement.Op.IndexAssg, array, value, index);
-
+	    SSAStatement value = (SSAStatement)exp.getValue().accept(this);
+            
+	    ret = new SSAStatement(exp, SSAStatement.Op.IndexAssg, array, value, index);
         }
         else
         {

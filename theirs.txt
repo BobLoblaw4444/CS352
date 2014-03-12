@@ -1,346 +1,726 @@
 program:
   main:
     method main:
-      0: NewObj *BS
-      1: Int *20
-      2: Arg 1 *0
-      3: Call 0 *Start(2)
-      4: Print 3
-  class BS:
+      0: NewObj *TV
+      1: Call 0 *Start()
+      2: Print 1
+  class TV:
     method Start:
-      5: Parameter *0
-      6: VarAssg 5 *sz
-      7: Null *Type(int)
-      8: Null *Type(int)
-      9: This
-      10: Arg 6 *0
-      11: Call 9 *Init(10)
-      12: VarAssg 11 *aux01
-      13: This
-      14: Call 13 *Print()
-      15: VarAssg 14 *aux02
-      16: This
+      3: Null *Type(Tree)
+      4: Null *Type(boolean)
+      5: Null *Type(int)
+      6: Null *Type(MyVisitor)
+      7: NewObj *Tree
+      8: VarAssg 7 *root
+      9: Int *16
+      10: Arg 9 *0
+      11: Call 8 *Init(10)
+      12: VarAssg 11 *ntb
+      13: Call 8 *Print()
+      14: VarAssg 13 *ntb
+      15: Int *100000000
+      16: Print 15
       17: Int *8
       18: Arg 17 *0
-      19: Call 16 *Search(18)
-      20: NBranch 19 *lif_2011117821_else
-      21: Int *1
-      22: Print 21
-      23: Goto *lif_2011117821_done
-      24: Label *lif_2011117821_else
-      25: Int *0
-      26: Print 25
-      27: Label *lif_2011117821_done
-      28: This
-      29: Int *19
+      19: Call 8 *Insert(18)
+      20: VarAssg 19 *ntb
+      21: Int *24
+      22: Arg 21 *0
+      23: Call 8 *Insert(22)
+      24: VarAssg 23 *ntb
+      25: Int *4
+      26: Arg 25 *0
+      27: Call 8 *Insert(26)
+      28: VarAssg 27 *ntb
+      29: Int *12
       30: Arg 29 *0
-      31: Call 28 *Search(30)
-      32: NBranch 31 *lif_233814070_else
-      33: Int *1
-      34: Print 33
-      35: Goto *lif_233814070_done
-      36: Label *lif_233814070_else
-      37: Int *0
-      38: Print 37
-      39: Label *lif_233814070_done
-      40: This
-      41: Int *20
+      31: Call 8 *Insert(30)
+      32: VarAssg 31 *ntb
+      33: Int *20
+      34: Arg 33 *0
+      35: Call 8 *Insert(34)
+      36: VarAssg 35 *ntb
+      37: Int *28
+      38: Arg 37 *0
+      39: Call 8 *Insert(38)
+      40: VarAssg 39 *ntb
+      41: Int *14
       42: Arg 41 *0
-      43: Call 40 *Search(42)
-      44: NBranch 43 *lif_1965484127_else
-      45: Int *1
-      46: Print 45
-      47: Goto *lif_1965484127_done
-      48: Label *lif_1965484127_else
-      49: Int *0
-      50: Print 49
-      51: Label *lif_1965484127_done
-      52: This
-      53: Int *21
-      54: Arg 53 *0
-      55: Call 52 *Search(54)
-      56: NBranch 55 *lif_1298264335_else
-      57: Int *1
-      58: Print 57
-      59: Goto *lif_1298264335_done
-      60: Label *lif_1298264335_else
-      61: Int *0
-      62: Print 61
-      63: Label *lif_1298264335_done
-      64: This
-      65: Int *37
-      66: Arg 65 *0
-      67: Call 64 *Search(66)
-      68: NBranch 67 *lif_1494824825_else
-      69: Int *1
-      70: Print 69
-      71: Goto *lif_1494824825_done
-      72: Label *lif_1494824825_else
-      73: Int *0
-      74: Print 73
-      75: Label *lif_1494824825_done
-      76: This
-      77: Int *38
-      78: Arg 77 *0
-      79: Call 76 *Search(78)
-      80: NBranch 79 *lif_109647522_else
-      81: Int *1
-      82: Print 81
-      83: Goto *lif_109647522_done
-      84: Label *lif_109647522_else
-      85: Int *0
-      86: Print 85
-      87: Label *lif_109647522_done
-      88: This
-      89: Int *39
-      90: Arg 89 *0
-      91: Call 88 *Search(90)
-      92: NBranch 91 *lif_304933128_else
-      93: Int *1
-      94: Print 93
-      95: Goto *lif_304933128_done
-      96: Label *lif_304933128_else
-      97: Int *0
-      98: Print 97
-      99: Label *lif_304933128_done
-      100: This
-      101: Int *50
-      102: Arg 101 *0
-      103: Call 100 *Search(102)
-      104: NBranch 103 *lif_1115100554_else
-      105: Int *1
-      106: Print 105
-      107: Goto *lif_1115100554_done
-      108: Label *lif_1115100554_else
-      109: Int *0
-      110: Print 109
-      111: Label *lif_1115100554_done
-      112: Int *999
-      113: Return 112
-    method Search:
-      114: Parameter *0
-      115: VarAssg 114 *num
-      116: Null *Type(boolean)
-      117: Null *Type(int)
-      118: Null *Type(int)
-      119: Null *Type(boolean)
-      120: Null *Type(int)
-      121: Null *Type(int)
-      122: Null *Type(int)
-      123: Int *0
-      124: VarAssg 123 *aux01
-      125: Boolean *false
-      126: VarAssg 125 *bs01
-      127: This
-      128: Member 127 *number
-      129: Member 128 *length
-      130: VarAssg 129 *right
-      131: Int *1
-      132: Minus 130 131
-      133: VarAssg 132 *right
-      134: Int *0
-      135: VarAssg 134 *left
-      136: Boolean *true
-      137: VarAssg 136 *var_cont
-      138: Label *lwhile_405223709_start
-      139: NBranch 137 *lwhile_405223709_end
-      140: Plus 135 133
-      141: VarAssg 140 *medium
-      142: This
-      143: Arg 141 *0
-      144: Call 142 *Div(143)
-      145: VarAssg 144 *medium
-      146: This
-      147: Member 146 *number
-      148: Index 147 145
-      149: VarAssg 148 *aux01
-      150: Lt 115 149
-      151: NBranch 150 *lif_924232526_else
-      152: Int *1
-      153: Minus 145 152
-      154: VarAssg 153 *right
-      155: Goto *lif_924232526_done
-      156: Label *lif_924232526_else
-      157: Int *1
-      158: Plus 145 157
-      159: VarAssg 158 *left
-      160: Label *lif_924232526_done
-      161: Unify 135 159
-      162: Unify 154 133
-      163: This
-      164: Arg 149 *0
-      165: Arg 115 *1
-      166: Call 163 *Compare(164, 165)
-      167: NBranch 166 *lif_826845731_else
-      168: Boolean *false
-      169: VarAssg 168 *var_cont
-      170: Goto *lif_826845731_done
-      171: Label *lif_826845731_else
-      172: Boolean *true
-      173: VarAssg 172 *var_cont
-      174: Label *lif_826845731_done
-      175: Unify 169 173
-      176: Lt 162 161
-      177: NBranch 176 *lif_429521180_else
-      178: Boolean *false
-      179: VarAssg 178 *var_cont
-      180: Goto *lif_429521180_done
-      181: Label *lif_429521180_else
-      182: Int *0
-      183: VarAssg 182 *nt
-      184: Label *lif_429521180_done
-      185: Unify 122 183
-      186: Unify 179 175
-      187: Goto *lwhile_405223709_start
-      188: Label *lwhile_405223709_end
-      189: Unify 122 185
-      190: Unify 137 186
-      191: Unify 124 149
-      192: Unify 135 161
-      193: Unify 133 162
-      194: Unify 120 145
-      195: This
-      196: Arg 191 *0
-      197: Arg 115 *1
-      198: Call 195 *Compare(196, 197)
-      199: NBranch 198 *lif_1269934693_else
-      200: Boolean *true
-      201: VarAssg 200 *bs01
-      202: Goto *lif_1269934693_done
-      203: Label *lif_1269934693_else
-      204: Boolean *false
-      205: VarAssg 204 *bs01
-      206: Label *lif_1269934693_done
-      207: Unify 201 205
-      208: Return 207
-    method Div:
-      209: Parameter *0
-      210: VarAssg 209 *num
-      211: Null *Type(int)
-      212: Null *Type(int)
-      213: Null *Type(int)
-      214: Int *0
-      215: VarAssg 214 *count01
-      216: Int *0
-      217: VarAssg 216 *count02
-      218: Int *1
-      219: Minus 210 218
-      220: VarAssg 219 *aux03
-      221: Label *lwhile_2099901365_start
-      222: Lt 217 220
-      223: NBranch 222 *lwhile_2099901365_end
-      224: Int *1
-      225: Plus 215 224
-      226: VarAssg 225 *count01
-      227: Int *2
-      228: Plus 217 227
-      229: VarAssg 228 *count02
-      230: Goto *lwhile_2099901365_start
-      231: Label *lwhile_2099901365_end
-      232: Unify 217 229
-      233: Unify 215 226
-      234: Return 233
-    method Compare:
-      235: Parameter *0
-      236: Parameter *1
-      237: VarAssg 235 *num1
-      238: VarAssg 236 *num2
-      239: Null *Type(boolean)
-      240: Null *Type(int)
-      241: Boolean *false
-      242: VarAssg 241 *retval
-      243: Int *1
-      244: Plus 238 243
-      245: VarAssg 244 *aux02
-      246: Lt 237 238
-      247: NBranch 246 *lif_1295986757_else
-      248: Boolean *false
-      249: VarAssg 248 *retval
-      250: Goto *lif_1295986757_done
-      251: Label *lif_1295986757_else
-      252: Lt 237 245
-      253: Not 252
-      254: NBranch 253 *lif_1870277025_else
-      255: Boolean *false
-      256: VarAssg 255 *retval
-      257: Goto *lif_1870277025_done
-      258: Label *lif_1870277025_else
-      259: Boolean *true
-      260: VarAssg 259 *retval
-      261: Label *lif_1870277025_done
-      262: Unify 256 260
-      263: Label *lif_1295986757_done
-      264: Unify 249 262
-      265: Return 264
-    method Print:
-      266: Null *Type(int)
-      267: Int *1
-      268: VarAssg 267 *j
-      269: Label *lwhile_1027818036_start
-      270: This
-      271: Member 270 *size
-      272: Lt 268 271
-      273: NBranch 272 *lwhile_1027818036_end
-      274: This
-      275: Member 274 *number
-      276: Index 275 268
-      277: Print 276
-      278: Int *1
-      279: Plus 268 278
-      280: VarAssg 279 *j
-      281: Goto *lwhile_1027818036_start
-      282: Label *lwhile_1027818036_end
-      283: Unify 268 280
-      284: Int *99999
-      285: Print 284
-      286: Int *0
-      287: Return 286
+      43: Call 8 *Insert(42)
+      44: VarAssg 43 *ntb
+      45: Call 8 *Print()
+      46: VarAssg 45 *ntb
+      47: Int *100000000
+      48: Print 47
+      49: NewObj *MyVisitor
+      50: VarAssg 49 *v
+      51: Int *50000000
+      52: Print 51
+      53: Arg 50 *0
+      54: Call 8 *accept(53)
+      55: VarAssg 54 *nti
+      56: Int *100000000
+      57: Print 56
+      58: Int *24
+      59: Arg 58 *0
+      60: Call 8 *Search(59)
+      61: Print 60
+      62: Int *12
+      63: Arg 62 *0
+      64: Call 8 *Search(63)
+      65: Print 64
+      66: Int *16
+      67: Arg 66 *0
+      68: Call 8 *Search(67)
+      69: Print 68
+      70: Int *50
+      71: Arg 70 *0
+      72: Call 8 *Search(71)
+      73: Print 72
+      74: Int *12
+      75: Arg 74 *0
+      76: Call 8 *Search(75)
+      77: Print 76
+      78: Int *12
+      79: Arg 78 *0
+      80: Call 8 *Delete(79)
+      81: VarAssg 80 *ntb
+      82: Call 8 *Print()
+      83: VarAssg 82 *ntb
+      84: Int *12
+      85: Arg 84 *0
+      86: Call 8 *Search(85)
+      87: Print 86
+      88: Int *0
+      89: Return 88
+  class Tree:
     method Init:
-      288: Parameter *0
-      289: VarAssg 288 *sz
-      290: Null *Type(int)
-      291: Null *Type(int)
-      292: Null *Type(int)
-      293: Null *Type(int)
-      294: This
-      295: MemberAssg 294 289 *size
-      296: This
-      297: NewIntArray 289
-      298: MemberAssg 296 297 *number
-      299: Int *1
-      300: VarAssg 299 *j
-      301: This
-      302: Member 301 *size
-      303: Int *1
-      304: Plus 302 303
-      305: VarAssg 304 *k
-      306: Label *lwhile_179274584_start
-      307: This
-      308: Member 307 *size
-      309: Lt 300 308
-      310: NBranch 309 *lwhile_179274584_end
-      311: Int *2
-      312: Mul 311 300
-      313: VarAssg 312 *aux01
-      314: Int *3
-      315: Minus 305 314
-      316: VarAssg 315 *aux02
-      317: This
-      318: Member 317 *number
-      319: Plus 313 316
-      320: IndexAssg 318 319 *300: VarAssg 299 *j
-      321: Int *1
-      322: Plus 300 321
-      323: VarAssg 322 *j
-      324: Int *1
-      325: Minus 305 324
-      326: VarAssg 325 *k
-      327: Goto *lwhile_179274584_start
-      328: Label *lwhile_179274584_end
-      329: Unify 292 316
-      330: Unify 293 313
-      331: Unify 300 323
-      332: Unify 305 326
-      333: Int *0
-      334: Return 333
+      90: Parameter *0
+      91: VarAssg 90 *v_key
+      92: This
+      93: MemberAssg 92 91 *key
+      94: This
+      95: Boolean *false
+      96: MemberAssg 94 95 *has_left
+      97: This
+      98: Boolean *false
+      99: MemberAssg 97 98 *has_right
+      100: Boolean *true
+      101: Return 100
+    method SetRight:
+      102: Parameter *0
+      103: VarAssg 102 *rn
+      104: This
+      105: MemberAssg 104 103 *right
+      106: Boolean *true
+      107: Return 106
+    method SetLeft:
+      108: Parameter *0
+      109: VarAssg 108 *ln
+      110: This
+      111: MemberAssg 110 109 *left
+      112: Boolean *true
+      113: Return 112
+    method GetRight:
+      114: This
+      115: Member 114 *right
+      116: Return 115
+    method GetLeft:
+      117: This
+      118: Member 117 *left
+      119: Return 118
+    method GetKey:
+      120: This
+      121: Member 120 *key
+      122: Return 121
+    method SetKey:
+      123: Parameter *0
+      124: VarAssg 123 *v_key
+      125: This
+      126: MemberAssg 125 124 *key
+      127: Boolean *true
+      128: Return 127
+    method GetHas_Right:
+      129: This
+      130: Member 129 *has_right
+      131: Return 130
+    method GetHas_Left:
+      132: This
+      133: Member 132 *has_left
+      134: Return 133
+    method SetHas_Left:
+      135: Parameter *0
+      136: VarAssg 135 *val
+      137: This
+      138: MemberAssg 137 136 *has_left
+      139: Boolean *true
+      140: Return 139
+    method SetHas_Right:
+      141: Parameter *0
+      142: VarAssg 141 *val
+      143: This
+      144: MemberAssg 143 142 *has_right
+      145: Boolean *true
+      146: Return 145
+    method Compare:
+      147: Parameter *0
+      148: Parameter *1
+      149: VarAssg 147 *num1
+      150: VarAssg 148 *num2
+      151: Null *Type(boolean)
+      152: Null *Type(int)
+      153: Boolean *false
+      154: VarAssg 153 *ntb
+      155: Int *1
+      156: Plus 150 155
+      157: VarAssg 156 *nti
+      158: Lt 149 150
+      159: NBranch 158 *lif_1867546546_else
+      160: Boolean *false
+      161: VarAssg 160 *ntb
+      162: Goto *lif_1867546546_done
+      163: Label *lif_1867546546_else
+      164: Lt 149 157
+      165: Not 164
+      166: NBranch 165 *lif_233814070_else
+      167: Boolean *false
+      168: VarAssg 167 *ntb
+      169: Goto *lif_233814070_done
+      170: Label *lif_233814070_else
+      171: Boolean *true
+      172: VarAssg 171 *ntb
+      173: Label *lif_233814070_done
+      174: Unify 168 172
+      175: Label *lif_1867546546_done
+      176: Unify 161 174
+      177: Return 176
+    method Insert:
+      178: Parameter *0
+      179: VarAssg 178 *v_key
+      180: Null *Type(Tree)
+      181: Null *Type(boolean)
+      182: Null *Type(Tree)
+      183: Null *Type(boolean)
+      184: Null *Type(int)
+      185: NewObj *Tree
+      186: VarAssg 185 *new_node
+      187: Arg 179 *0
+      188: Call 186 *Init(187)
+      189: VarAssg 188 *ntb
+      190: This
+      191: VarAssg 190 *current_node
+      192: Boolean *true
+      193: VarAssg 192 *cont
+      194: Label *lwhile_1494824825_start
+      195: NBranch 193 *lwhile_1494824825_end
+      196: Call 191 *GetKey()
+      197: VarAssg 196 *key_aux
+      198: Lt 179 197
+      199: NBranch 198 *lif_109647522_else
+      200: Call 191 *GetHas_Left()
+      201: NBranch 200 *lif_304933128_else
+      202: Call 191 *GetLeft()
+      203: VarAssg 202 *current_node
+      204: Goto *lif_304933128_done
+      205: Label *lif_304933128_else
+      206: Boolean *false
+      207: VarAssg 206 *cont
+      208: Boolean *true
+      209: Arg 208 *0
+      210: Call 191 *SetHas_Left(209)
+      211: VarAssg 210 *ntb
+      212: Arg 186 *0
+      213: Call 191 *SetLeft(212)
+      214: VarAssg 213 *ntb
+      215: Label *lif_304933128_done
+      216: Unify 189 214
+      217: Unify 193 207
+      218: Unify 203 191
+      219: Goto *lif_109647522_done
+      220: Label *lif_109647522_else
+      221: Call 191 *GetHas_Right()
+      222: NBranch 221 *lif_1115100554_else
+      223: Call 191 *GetRight()
+      224: VarAssg 223 *current_node
+      225: Goto *lif_1115100554_done
+      226: Label *lif_1115100554_else
+      227: Boolean *false
+      228: VarAssg 227 *cont
+      229: Boolean *true
+      230: Arg 229 *0
+      231: Call 191 *SetHas_Right(230)
+      232: VarAssg 231 *ntb
+      233: Arg 186 *0
+      234: Call 191 *SetRight(233)
+      235: VarAssg 234 *ntb
+      236: Label *lif_1115100554_done
+      237: Unify 189 235
+      238: Unify 193 228
+      239: Unify 224 191
+      240: Label *lif_109647522_done
+      241: Unify 216 237
+      242: Unify 217 238
+      243: Unify 218 239
+      244: Goto *lwhile_1494824825_start
+      245: Label *lwhile_1494824825_end
+      246: Unify 189 241
+      247: Unify 184 197
+      248: Unify 193 242
+      249: Unify 191 243
+      250: Boolean *true
+      251: Return 250
+    method Delete:
+      252: Parameter *0
+      253: VarAssg 252 *v_key
+      254: Null *Type(Tree)
+      255: Null *Type(Tree)
+      256: Null *Type(boolean)
+      257: Null *Type(boolean)
+      258: Null *Type(boolean)
+      259: Null *Type(boolean)
+      260: Null *Type(int)
+      261: This
+      262: VarAssg 261 *current_node
+      263: This
+      264: VarAssg 263 *parent_node
+      265: Boolean *true
+      266: VarAssg 265 *cont
+      267: Boolean *false
+      268: VarAssg 267 *found
+      269: Boolean *true
+      270: VarAssg 269 *is_root
+      271: Label *lwhile_405223709_start
+      272: NBranch 266 *lwhile_405223709_end
+      273: Call 262 *GetKey()
+      274: VarAssg 273 *key_aux
+      275: Lt 253 274
+      276: NBranch 275 *lif_924232526_else
+      277: Call 262 *GetHas_Left()
+      278: NBranch 277 *lif_826845731_else
+      279: VarAssg 262 *parent_node
+      280: Call 262 *GetLeft()
+      281: VarAssg 280 *current_node
+      282: Goto *lif_826845731_done
+      283: Label *lif_826845731_else
+      284: Boolean *false
+      285: VarAssg 284 *cont
+      286: Label *lif_826845731_done
+      287: Unify 279 264
+      288: Unify 266 285
+      289: Unify 281 262
+      290: Goto *lif_924232526_done
+      291: Label *lif_924232526_else
+      292: Lt 274 253
+      293: NBranch 292 *lif_429521180_else
+      294: Call 262 *GetHas_Right()
+      295: NBranch 294 *lif_1269934693_else
+      296: VarAssg 262 *parent_node
+      297: Call 262 *GetRight()
+      298: VarAssg 297 *current_node
+      299: Goto *lif_1269934693_done
+      300: Label *lif_1269934693_else
+      301: Boolean *false
+      302: VarAssg 301 *cont
+      303: Label *lif_1269934693_done
+      304: Unify 296 264
+      305: Unify 266 302
+      306: Unify 298 262
+      307: Goto *lif_429521180_done
+      308: Label *lif_429521180_else
+      309: NBranch 270 *lif_2099901365_else
+      310: Call 262 *GetHas_Right()
+      311: Not 310
+      312: Call 262 *GetHas_Left()
+      313: Not 312
+      314: And 311 313
+      315: NBranch 314 *lif_1295986757_else
+      316: Boolean *true
+      317: VarAssg 316 *ntb
+      318: Goto *lif_1295986757_done
+      319: Label *lif_1295986757_else
+      320: This
+      321: Arg 264 *0
+      322: Arg 262 *1
+      323: Call 320 *Remove(321, 322)
+      324: VarAssg 323 *ntb
+      325: Label *lif_1295986757_done
+      326: Unify 317 324
+      327: Goto *lif_2099901365_done
+      328: Label *lif_2099901365_else
+      329: This
+      330: Arg 264 *0
+      331: Arg 262 *1
+      332: Call 329 *Remove(330, 331)
+      333: VarAssg 332 *ntb
+      334: Label *lif_2099901365_done
+      335: Unify 326 333
+      336: Boolean *true
+      337: VarAssg 336 *found
+      338: Boolean *false
+      339: VarAssg 338 *cont
+      340: Label *lif_429521180_done
+      341: Unify 304 264
+      342: Unify 258 335
+      343: Unify 305 339
+      344: Unify 268 337
+      345: Unify 306 262
+      346: Label *lif_924232526_done
+      347: Unify 287 341
+      348: Unify 258 342
+      349: Unify 288 343
+      350: Unify 289 345
+      351: Unify 268 344
+      352: Boolean *false
+      353: VarAssg 352 *is_root
+      354: Goto *lwhile_405223709_start
+      355: Label *lwhile_405223709_end
+      356: Unify 270 353
+      357: Unify 264 347
+      358: Unify 258 348
+      359: Unify 260 274
+      360: Unify 266 349
+      361: Unify 268 351
+      362: Unify 262 350
+      363: Return 361
+    method Remove:
+      364: Parameter *0
+      365: Parameter *1
+      366: VarAssg 364 *p_node
+      367: VarAssg 365 *c_node
+      368: Null *Type(boolean)
+      369: Null *Type(int)
+      370: Null *Type(int)
+      371: Call 367 *GetHas_Left()
+      372: NBranch 371 *lif_1870277025_else
+      373: This
+      374: Arg 366 *0
+      375: Arg 367 *1
+      376: Call 373 *RemoveLeft(374, 375)
+      377: VarAssg 376 *ntb
+      378: Goto *lif_1870277025_done
+      379: Label *lif_1870277025_else
+      380: Call 367 *GetHas_Right()
+      381: NBranch 380 *lif_1027818036_else
+      382: This
+      383: Arg 366 *0
+      384: Arg 367 *1
+      385: Call 382 *RemoveRight(383, 384)
+      386: VarAssg 385 *ntb
+      387: Goto *lif_1027818036_done
+      388: Label *lif_1027818036_else
+      389: Call 367 *GetKey()
+      390: VarAssg 389 *auxkey1
+      391: Call 366 *GetLeft()
+      392: Call 391 *GetKey()
+      393: VarAssg 392 *auxkey2
+      394: This
+      395: Arg 390 *0
+      396: Arg 393 *1
+      397: Call 394 *Compare(395, 396)
+      398: NBranch 397 *lif_179274584_else
+      399: This
+      400: Member 399 *my_null
+      401: Arg 400 *0
+      402: Call 366 *SetLeft(401)
+      403: VarAssg 402 *ntb
+      404: Boolean *false
+      405: Arg 404 *0
+      406: Call 366 *SetHas_Left(405)
+      407: VarAssg 406 *ntb
+      408: Goto *lif_179274584_done
+      409: Label *lif_179274584_else
+      410: This
+      411: Member 410 *my_null
+      412: Arg 411 *0
+      413: Call 366 *SetRight(412)
+      414: VarAssg 413 *ntb
+      415: Boolean *false
+      416: Arg 415 *0
+      417: Call 366 *SetHas_Right(416)
+      418: VarAssg 417 *ntb
+      419: Label *lif_179274584_done
+      420: Unify 407 418
+      421: Label *lif_1027818036_done
+      422: Unify 386 420
+      423: Unify 369 390
+      424: Unify 370 393
+      425: Label *lif_1870277025_done
+      426: Unify 377 422
+      427: Unify 369 423
+      428: Unify 370 424
+      429: Boolean *true
+      430: Return 429
+    method RemoveRight:
+      431: Parameter *0
+      432: Parameter *1
+      433: VarAssg 431 *p_node
+      434: VarAssg 432 *c_node
+      435: Null *Type(boolean)
+      436: Label *lwhile_148376547_start
+      437: Call 434 *GetHas_Right()
+      438: NBranch 437 *lwhile_148376547_end
+      439: Call 434 *GetRight()
+      440: Call 439 *GetKey()
+      441: Arg 440 *0
+      442: Call 434 *SetKey(441)
+      443: VarAssg 442 *ntb
+      444: VarAssg 434 *p_node
+      445: Call 434 *GetRight()
+      446: VarAssg 445 *c_node
+      447: Goto *lwhile_148376547_start
+      448: Label *lwhile_148376547_end
+      449: Unify 435 443
+      450: Unify 433 444
+      451: Unify 434 446
+      452: This
+      453: Member 452 *my_null
+      454: Arg 453 *0
+      455: Call 450 *SetRight(454)
+      456: VarAssg 455 *ntb
+      457: Boolean *false
+      458: Arg 457 *0
+      459: Call 450 *SetHas_Right(458)
+      460: VarAssg 459 *ntb
+      461: Boolean *true
+      462: Return 461
+    method RemoveLeft:
+      463: Parameter *0
+      464: Parameter *1
+      465: VarAssg 463 *p_node
+      466: VarAssg 464 *c_node
+      467: Null *Type(boolean)
+      468: Label *lwhile_536111262_start
+      469: Call 466 *GetHas_Left()
+      470: NBranch 469 *lwhile_536111262_end
+      471: Call 466 *GetLeft()
+      472: Call 471 *GetKey()
+      473: Arg 472 *0
+      474: Call 466 *SetKey(473)
+      475: VarAssg 474 *ntb
+      476: VarAssg 466 *p_node
+      477: Call 466 *GetLeft()
+      478: VarAssg 477 *c_node
+      479: Goto *lwhile_536111262_start
+      480: Label *lwhile_536111262_end
+      481: Unify 467 475
+      482: Unify 465 476
+      483: Unify 466 478
+      484: This
+      485: Member 484 *my_null
+      486: Arg 485 *0
+      487: Call 482 *SetLeft(486)
+      488: VarAssg 487 *ntb
+      489: Boolean *false
+      490: Arg 489 *0
+      491: Call 482 *SetHas_Left(490)
+      492: VarAssg 491 *ntb
+      493: Boolean *true
+      494: Return 493
+    method Search:
+      495: Parameter *0
+      496: VarAssg 495 *v_key
+      497: Null *Type(Tree)
+      498: Null *Type(int)
+      499: Null *Type(boolean)
+      500: Null *Type(int)
+      501: This
+      502: VarAssg 501 *current_node
+      503: Boolean *true
+      504: VarAssg 503 *cont
+      505: Int *0
+      506: VarAssg 505 *ifound
+      507: Label *lwhile_1728081269_start
+      508: NBranch 504 *lwhile_1728081269_end
+      509: Call 502 *GetKey()
+      510: VarAssg 509 *key_aux
+      511: Lt 496 510
+      512: NBranch 511 *lif_1293046055_else
+      513: Call 502 *GetHas_Left()
+      514: NBranch 513 *lif_1838022392_else
+      515: Call 502 *GetLeft()
+      516: VarAssg 515 *current_node
+      517: Goto *lif_1838022392_done
+      518: Label *lif_1838022392_else
+      519: Boolean *false
+      520: VarAssg 519 *cont
+      521: Label *lif_1838022392_done
+      522: Unify 504 520
+      523: Unify 516 502
+      524: Goto *lif_1293046055_done
+      525: Label *lif_1293046055_else
+      526: Lt 510 496
+      527: NBranch 526 *lif_90080249_else
+      528: Call 502 *GetHas_Right()
+      529: NBranch 528 *lif_2773808_else
+      530: Call 502 *GetRight()
+      531: VarAssg 530 *current_node
+      532: Goto *lif_2773808_done
+      533: Label *lif_2773808_else
+      534: Boolean *false
+      535: VarAssg 534 *cont
+      536: Label *lif_2773808_done
+      537: Unify 504 535
+      538: Unify 531 502
+      539: Goto *lif_90080249_done
+      540: Label *lif_90080249_else
+      541: Int *1
+      542: VarAssg 541 *ifound
+      543: Boolean *false
+      544: VarAssg 543 *cont
+      545: Label *lif_90080249_done
+      546: Unify 506 542
+      547: Unify 537 544
+      548: Unify 538 502
+      549: Label *lif_1293046055_done
+      550: Unify 506 546
+      551: Unify 522 547
+      552: Unify 523 548
+      553: Goto *lwhile_1728081269_start
+      554: Label *lwhile_1728081269_end
+      555: Unify 506 550
+      556: Unify 500 510
+      557: Unify 504 551
+      558: Unify 502 552
+      559: Return 555
+    method Print:
+      560: Null *Type(boolean)
+      561: Null *Type(Tree)
+      562: This
+      563: VarAssg 562 *current_node
+      564: This
+      565: Arg 563 *0
+      566: Call 564 *RecPrint(565)
+      567: VarAssg 566 *ntb
+      568: Boolean *true
+      569: Return 568
+    method RecPrint:
+      570: Parameter *0
+      571: VarAssg 570 *node
+      572: Null *Type(boolean)
+      573: Call 571 *GetHas_Left()
+      574: NBranch 573 *lif_1522234469_else
+      575: This
+      576: Call 571 *GetLeft()
+      577: Arg 576 *0
+      578: Call 575 *RecPrint(577)
+      579: VarAssg 578 *ntb
+      580: Goto *lif_1522234469_done
+      581: Label *lif_1522234469_else
+      582: Boolean *true
+      583: VarAssg 582 *ntb
+      584: Label *lif_1522234469_done
+      585: Unify 579 583
+      586: Call 571 *GetKey()
+      587: Print 586
+      588: Call 571 *GetHas_Right()
+      589: NBranch 588 *lif_1222033772_else
+      590: This
+      591: Call 571 *GetRight()
+      592: Arg 591 *0
+      593: Call 590 *RecPrint(592)
+      594: VarAssg 593 *ntb
+      595: Goto *lif_1222033772_done
+      596: Label *lif_1222033772_else
+      597: Boolean *true
+      598: VarAssg 597 *ntb
+      599: Label *lif_1222033772_done
+      600: Unify 594 598
+      601: Boolean *true
+      602: Return 601
+    method accept:
+      603: Parameter *0
+      604: VarAssg 603 *v
+      605: Null *Type(int)
+      606: Int *333
+      607: Print 606
+      608: This
+      609: Arg 608 *0
+      610: Call 604 *visit(609)
+      611: VarAssg 610 *nti
+      612: Int *0
+      613: Return 612
+  class Visitor:
+    method visit:
+      614: Parameter *0
+      615: VarAssg 614 *n
+      616: Null *Type(int)
+      617: Call 615 *GetHas_Right()
+      618: NBranch 617 *lif_870010735_else
+      619: This
+      620: Call 615 *GetRight()
+      621: MemberAssg 619 620 *r
+      622: This
+      623: Member 622 *r
+      624: This
+      625: Arg 624 *0
+      626: Call 623 *accept(625)
+      627: VarAssg 626 *nti
+      628: Goto *lif_870010735_done
+      629: Label *lif_870010735_else
+      630: Int *0
+      631: VarAssg 630 *nti
+      632: Label *lif_870010735_done
+      633: Unify 627 631
+      634: Call 615 *GetHas_Left()
+      635: NBranch 634 *lif_54270722_else
+      636: This
+      637: Call 615 *GetLeft()
+      638: MemberAssg 636 637 *l
+      639: This
+      640: Member 639 *l
+      641: This
+      642: Arg 641 *0
+      643: Call 640 *accept(642)
+      644: VarAssg 643 *nti
+      645: Goto *lif_54270722_done
+      646: Label *lif_54270722_else
+      647: Int *0
+      648: VarAssg 647 *nti
+      649: Label *lif_54270722_done
+      650: Unify 644 648
+      651: Int *0
+      652: Return 651
+  class MyVisitor:
+    method visit:
+      653: Parameter *0
+      654: VarAssg 653 *n
+      655: Null *Type(int)
+      656: Call 654 *GetHas_Right()
+      657: NBranch 656 *lif_1594958326_else
+      658: This
+      659: Call 654 *GetRight()
+      660: MemberAssg 658 659 *r
+      661: This
+      662: Member 661 *r
+      663: This
+      664: Arg 663 *0
+      665: Call 662 *accept(664)
+      666: VarAssg 665 *nti
+      667: Goto *lif_1594958326_done
+      668: Label *lif_1594958326_else
+      669: Int *0
+      670: VarAssg 669 *nti
+      671: Label *lif_1594958326_done
+      672: Unify 666 670
+      673: Call 654 *GetKey()
+      674: Print 673
+      675: Call 654 *GetHas_Left()
+      676: NBranch 675 *lif_1573703228_else
+      677: This
+      678: Call 654 *GetLeft()
+      679: MemberAssg 677 678 *l
+      680: This
+      681: Member 680 *l
+      682: This
+      683: Arg 682 *0
+      684: Call 681 *accept(683)
+      685: VarAssg 684 *nti
+      686: Goto *lif_1573703228_done
+      687: Label *lif_1573703228_else
+      688: Int *0
+      689: VarAssg 688 *nti
+      690: Label *lif_1573703228_done
+      691: Unify 685 689
+      692: Int *0
+      693: Return 692
 
