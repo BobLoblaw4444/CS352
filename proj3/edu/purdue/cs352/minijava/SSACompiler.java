@@ -51,9 +51,15 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         SSACompiler compiler = new SSACompiler();
 
         // visit the parameters
+	ArrayList<SSAStatement> parameters = new ArrayList<SSAStatement>();
         for(Parameter para : method.getParameters())
 	{
-	    para.accept(compiler);
+	    parameters.add((SSAStatement)para.accept(compiler));
+	}
+
+	for(SSAStatement param : parameters)
+	{
+	    compiler.body.add(new SSAStatement(method, SSAStatement.Op.VarAssg, param, null, ((Parameter)param.getASTNode()).getName()));
 	}
 
 	// Reset position for next parameter list
@@ -89,6 +95,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	this.symbolTable.put(param.getName(), ret);
 
 	this.body.add(ret);
+	
 	pos++;
 	return ret;
     }
@@ -100,8 +107,8 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
 	ret = new SSAStatement(varDecl, SSAStatement.Op.Null, varDecl.getType());
 	
-	symbolTable.put(varDecl.getName(), ret);
-	
+	this.symbolTable.put(varDecl.getName(), ret);
+
 	this.body.add(ret);
 	return ret;
     }
@@ -196,14 +203,24 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    SSAStatement originalEntry = sym.getValue();
 	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
 	    
-	    if(originalEntry.getIndex() != newEntry.getIndex())
+	    if(originalEntry == null)
+	    {
+		System.out.println("OriginalEntry: " + sym.getKey());
+	    }
+	    if(newEntry == null)
+	    {
+		System.out.println("NewEntry: " + sym.getKey());
+	    }
+
+	    if(newEntry != null && originalEntry.getIndex() != newEntry.getIndex())
 	    {
 		SSAStatement unify = new SSAStatement(ifStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
 		this.body.add(unify);
-		ret = unify;
+		this.symbolTable.put(sym.getKey(), unify);
 	    }
 	}	
 	
+	ret = notBranch;
 	return ret;
     }
 
@@ -251,10 +268,11 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    {
 		SSAStatement unify = new SSAStatement(whileStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
 		this.body.add(unify);
+		this.symbolTable.put(sym.getKey(), unify);
 	    }
 	}
 
-	return conditionLabel;
+	return notBranch;
     }
 
     // PrintStatement
@@ -280,22 +298,31 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         SSAStatement ret;
         
 	// Assign to variable
-	if (target instanceof VarExp)
+	if (target instanceof VarExp )
         { 
 	    String name = ((VarExp)target).getName();
 
-	    ret = new SSAStatement(exp, SSAStatement.Op.VarAssg, value, null, name);            
-	    
-	    this.symbolTable.put(name, ret);
-        }
+	    if(this.symbolTable.get(name) == null)
+	    {
+		SSAStatement thisExp = new SSAStatement(exp, SSAStatement.Op.This, null);
+		this.body.add(thisExp);
+
+		ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, thisExp, value, name);
+	    }
+	    else
+	    {
+		ret = new SSAStatement(exp, SSAStatement.Op.VarAssg, value, null, name);            
+		this.symbolTable.put(name, ret);
+	    }
+	}
 	// Assign to member
-        else if (target instanceof MemberExp)
+        else if (target instanceof MemberExp )
         {
 	    String name = ((MemberExp)target).getMember();
 	   
 	    SSAStatement member = (SSAStatement)((MemberExp)target).getSub().accept(this);
 
-            ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, member, value, name);
+            ret = new SSAStatement(exp, SSAStatement.Op.MemberAssg, member.getLeft(), value, name);
 
         }
 	// Assign to array
@@ -352,6 +379,8 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     {
 	SSAStatement ret;
 
+	SSACompiler newCompiler = new SSACompiler();
+
 	SSAStatement target = (SSAStatement)(callExp.getTarget().accept(this));
 
 	// Build an SSAStatement argument list from Exp list
@@ -407,7 +436,10 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	
 	if(ret == null)
 	{ 
-	    ret = new SSAStatement(var, SSAStatement.Op.Null, var.getName());
+	    SSAStatement thisExp = new SSAStatement(var, SSAStatement.Op.This, null);
+	    this.body.add(thisExp);
+	
+	    ret = new SSAStatement(var, SSAStatement.Op.Member, thisExp, null, var.getName());
 	   
 	    
 	    this.body.add(ret);

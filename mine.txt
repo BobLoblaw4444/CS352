@@ -1,1 +1,346 @@
-(Program (Main (PrintStatement (CallExp (new "BS") "Start" (int 20)))) (ClassDecl "BS" null (VarDecl (TypeIntArray) "number") (VarDecl (TypeInt) "size") (MethodDecl (TypeInt) "Start" (Parameters (Parameter (TypeInt) "sz")) (VarDecls) (Statements (ExpStatement (AssignExp (VarExp "sz") (+ (+ (int 5) (int 2)) (int 3)))) (ExpStatement (AssignExp (MemberExp (IndexExp (VarExp "number") (int 4)) "val") (int 9)))) (Return (VarExp "sz")))))
+program:
+  main:
+    method main:
+      0: NewObj *BS
+      1: Int *20
+      2: Arg 1 *0
+      3: Call 0 *Start(2)
+      4: Print 3
+  class BS:
+    method Start:
+      5: Parameter *0
+      6: VarAssg 5 *sz
+      7: Null *Type(int)
+      8: Null *Type(int)
+      9: This
+      10: Arg 5 *0
+      11: Call 9 *Init(10)
+      12: VarAssg 11 *aux01
+      13: This
+      14: Call 13 *Print()
+      15: VarAssg 14 *aux02
+      16: This
+      17: Int *8
+      18: Arg 17 *0
+      19: Call 16 *Search(18)
+      20: NBranch 19 *Else
+      21: Int *1
+      22: Print 21
+      23: Goto *Final
+      24: Label *Else
+      25: Int *0
+      26: Print 25
+      27: Label *Final
+      28: This
+      29: Int *19
+      30: Arg 29 *0
+      31: Call 28 *Search(30)
+      32: NBranch 31 *Else
+      33: Int *1
+      34: Print 33
+      35: Goto *Final
+      36: Label *Else
+      37: Int *0
+      38: Print 37
+      39: Label *Final
+      40: This
+      41: Int *20
+      42: Arg 41 *0
+      43: Call 40 *Search(42)
+      44: NBranch 43 *Else
+      45: Int *1
+      46: Print 45
+      47: Goto *Final
+      48: Label *Else
+      49: Int *0
+      50: Print 49
+      51: Label *Final
+      52: This
+      53: Int *21
+      54: Arg 53 *0
+      55: Call 52 *Search(54)
+      56: NBranch 55 *Else
+      57: Int *1
+      58: Print 57
+      59: Goto *Final
+      60: Label *Else
+      61: Int *0
+      62: Print 61
+      63: Label *Final
+      64: This
+      65: Int *37
+      66: Arg 65 *0
+      67: Call 64 *Search(66)
+      68: NBranch 67 *Else
+      69: Int *1
+      70: Print 69
+      71: Goto *Final
+      72: Label *Else
+      73: Int *0
+      74: Print 73
+      75: Label *Final
+      76: This
+      77: Int *38
+      78: Arg 77 *0
+      79: Call 76 *Search(78)
+      80: NBranch 79 *Else
+      81: Int *1
+      82: Print 81
+      83: Goto *Final
+      84: Label *Else
+      85: Int *0
+      86: Print 85
+      87: Label *Final
+      88: This
+      89: Int *39
+      90: Arg 89 *0
+      91: Call 88 *Search(90)
+      92: NBranch 91 *Else
+      93: Int *1
+      94: Print 93
+      95: Goto *Final
+      96: Label *Else
+      97: Int *0
+      98: Print 97
+      99: Label *Final
+      100: This
+      101: Int *50
+      102: Arg 101 *0
+      103: Call 100 *Search(102)
+      104: NBranch 103 *Else
+      105: Int *1
+      106: Print 105
+      107: Goto *Final
+      108: Label *Else
+      109: Int *0
+      110: Print 109
+      111: Label *Final
+      112: Int *999
+      113: Return 112
+    method Search:
+      114: Parameter *0
+      115: VarAssg 114 *num
+      116: Null *Type(boolean)
+      117: Null *Type(int)
+      118: Null *Type(int)
+      119: Null *Type(boolean)
+      120: Null *Type(int)
+      121: Null *Type(int)
+      122: Null *Type(int)
+      123: Int *0
+      124: VarAssg 123 *aux01
+      125: Boolean *false
+      126: VarAssg 125 *bs01
+      127: This
+      128: Member 127 *number
+      129: Member 128 *length
+      130: VarAssg 129 *right
+      131: Int *1
+      132: Minus 130 131
+      133: VarAssg 132 *right
+      134: Int *0
+      135: VarAssg 134 *left
+      136: Boolean *true
+      137: VarAssg 136 *var_cont
+      138: Label *Condition
+      139: NBranch 137 *End
+      140: Plus 135 133
+      141: VarAssg 140 *medium
+      142: This
+      143: Arg 141 *0
+      144: Call 142 *Div(143)
+      145: VarAssg 144 *medium
+      146: This
+      147: Member 146 *number
+      148: Index 147 145
+      149: VarAssg 148 *aux01
+      150: Lt 114 149
+      151: NBranch 150 *Else
+      152: Int *1
+      153: Minus 145 152
+      154: VarAssg 153 *right
+      155: Goto *Final
+      156: Label *Else
+      157: Int *1
+      158: Plus 145 157
+      159: VarAssg 158 *left
+      160: Label *Final
+      161: Unify 135 159
+      162: Unify 154 133
+      163: This
+      164: Arg 149 *0
+      165: Arg 114 *1
+      166: Call 163 *Compare(164, 165)
+      167: NBranch 166 *Else
+      168: Boolean *false
+      169: VarAssg 168 *var_cont
+      170: Goto *Final
+      171: Label *Else
+      172: Boolean *true
+      173: VarAssg 172 *var_cont
+      174: Label *Final
+      175: Unify 169 173
+      176: Lt 162 161
+      177: NBranch 176 *Else
+      178: Boolean *false
+      179: VarAssg 178 *var_cont
+      180: Goto *Final
+      181: Label *Else
+      182: Int *0
+      183: VarAssg 182 *nt
+      184: Label *Final
+      185: Unify 122 183
+      186: Unify 179 175
+      187: Goto *Condition
+      188: Label *End
+      189: Unify 122 185
+      190: Unify 137 186
+      191: Unify 124 149
+      192: Unify 135 161
+      193: Unify 133 162
+      194: Unify 120 145
+      195: This
+      196: Arg 191 *0
+      197: Arg 114 *1
+      198: Call 195 *Compare(196, 197)
+      199: NBranch 198 *Else
+      200: Boolean *true
+      201: VarAssg 200 *bs01
+      202: Goto *Final
+      203: Label *Else
+      204: Boolean *false
+      205: VarAssg 204 *bs01
+      206: Label *Final
+      207: Unify 201 205
+      208: Return 207
+    method Div:
+      209: Parameter *0
+      210: VarAssg 209 *num
+      211: Null *Type(int)
+      212: Null *Type(int)
+      213: Null *Type(int)
+      214: Int *0
+      215: VarAssg 214 *count01
+      216: Int *0
+      217: VarAssg 216 *count02
+      218: Int *1
+      219: Minus 209 218
+      220: VarAssg 219 *aux03
+      221: Label *Condition
+      222: Lt 217 220
+      223: NBranch 222 *End
+      224: Int *1
+      225: Plus 215 224
+      226: VarAssg 225 *count01
+      227: Int *2
+      228: Plus 217 227
+      229: VarAssg 228 *count02
+      230: Goto *Condition
+      231: Label *End
+      232: Unify 217 229
+      233: Unify 215 226
+      234: Return 233
+    method Compare:
+      235: Parameter *0
+      236: Parameter *1
+      237: VarAssg 235 *num1
+      238: VarAssg 236 *num2
+      239: Null *Type(boolean)
+      240: Null *Type(int)
+      241: Boolean *false
+      242: VarAssg 241 *retval
+      243: Int *1
+      244: Plus 236 243
+      245: VarAssg 244 *aux02
+      246: Lt 235 236
+      247: NBranch 246 *Else
+      248: Boolean *false
+      249: VarAssg 248 *retval
+      250: Goto *Final
+      251: Label *Else
+      252: Lt 235 245
+      253: Not 252
+      254: NBranch 253 *Else
+      255: Boolean *false
+      256: VarAssg 255 *retval
+      257: Goto *Final
+      258: Label *Else
+      259: Boolean *true
+      260: VarAssg 259 *retval
+      261: Label *Final
+      262: Unify 256 260
+      263: Label *Final
+      264: Unify 249 262
+      265: Return 264
+    method Print:
+      266: Null *Type(int)
+      267: Int *1
+      268: VarAssg 267 *j
+      269: Label *Condition
+      270: This
+      271: Member 270 *size
+      272: Lt 268 271
+      273: NBranch 272 *End
+      274: This
+      275: Member 274 *number
+      276: Index 275 268
+      277: Print 276
+      278: Int *1
+      279: Plus 268 278
+      280: VarAssg 279 *j
+      281: Goto *Condition
+      282: Label *End
+      283: Unify 268 280
+      284: Int *99999
+      285: Print 284
+      286: Int *0
+      287: Return 286
+    method Init:
+      288: Parameter *0
+      289: VarAssg 288 *sz
+      290: Null *Type(int)
+      291: Null *Type(int)
+      292: Null *Type(int)
+      293: Null *Type(int)
+      294: This
+      295: MemberAssg 294 288 *size
+      296: NewIntArray 288
+      297: This
+      298: MemberAssg 297 296 *number
+      299: Int *1
+      300: VarAssg 299 *j
+      301: This
+      302: Member 301 *size
+      303: Int *1
+      304: Plus 302 303
+      305: VarAssg 304 *k
+      306: Label *Condition
+      307: This
+      308: Member 307 *size
+      309: Lt 300 308
+      310: NBranch 309 *End
+      311: Int *2
+      312: Mul 311 300
+      313: VarAssg 312 *aux01
+      314: Int *3
+      315: Minus 305 314
+      316: VarAssg 315 *aux02
+      317: Plus 313 316
+      318: This
+      319: Member 318 *number
+      320: IndexAssg 319 317 *300: VarAssg 299 *j
+      321: Int *1
+      322: Plus 300 321
+      323: VarAssg 322 *j
+      324: Int *1
+      325: Minus 305 324
+      326: VarAssg 325 *k
+      327: Goto *Condition
+      328: Label *End
+      329: Unify 292 316
+      330: Unify 293 313
+      331: Unify 300 323
+      332: Unify 305 326
+      333: Int *0
+      334: Return 333
+
