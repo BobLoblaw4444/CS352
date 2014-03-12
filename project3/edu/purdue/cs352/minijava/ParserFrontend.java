@@ -4,7 +4,7 @@ import edu.purdue.cs352.minijava.ast.*;
 import edu.purdue.cs352.minijava.parser.*;
 
 public class ParserFrontend {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         ParserAST parser;
         Program prog;
         ASTToSExp sexp;
@@ -21,13 +21,7 @@ public class ParserFrontend {
             return;
         }
 
-        try {
-            prog = parser.Program();
-        } catch (ParseException ex) {
-            System.out.println(ex.getMessage());
-            return;
-        }
-
+        prog = parser.Program();
         sexp = new ASTToSExp();
 
         System.out.println(prog.accept(sexp));

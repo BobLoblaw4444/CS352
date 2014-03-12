@@ -97,8 +97,6 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	
 	SSAStatement ret = new SSAStatement(param, SSAStatement.Op.Parameter, this.pos);
 	
-	//this.symbolTable.put(param.getName(), ret);
-
 	this.body.add(ret);
 	
 	pos++;
@@ -211,15 +209,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    SSAStatement originalEntry = sym.getValue();
 	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
 	    
-	    if(originalEntry == null)
-	    {
-		System.out.println("OriginalEntry: " + sym.getKey());
-	    }
-	    if(newEntry == null)
-	    {
-		System.out.println("NewEntry: " + sym.getKey());
-	    }
-
+	    // Update the changed variables
 	    if(newEntry != null && originalEntry.getIndex() != newEntry.getIndex())
 	    {
 		SSAStatement unify = new SSAStatement(ifStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
@@ -310,7 +300,8 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	if (target instanceof VarExp )
         { 
 	    String name = ((VarExp)target).getName();
-
+		
+	    // Check if this variable is in the symbol table, if not its a member of this
 	    if(this.symbolTable.get(name) == null)
 	    {
 		SSAStatement thisExp = new SSAStatement(exp, SSAStatement.Op.This, null);
@@ -453,7 +444,6 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    this.body.add(thisExp);
 	
 	    ret = new SSAStatement(var, SSAStatement.Op.Member, thisExp, null, var.getName());
-	   
 	    
 	    this.body.add(ret);
 	}
