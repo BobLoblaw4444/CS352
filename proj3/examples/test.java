@@ -16,9 +16,10 @@ class BS{
     public int Start(int num){
 	//size = 8 + 6 * 0;
 	//return sz ;
-    	int var;	
-	while ((num=num-1)>0)
-        	num=1;
+    	//int var;
+	num = something.length;	
+	//while ((num=num-1)>0)
+        //	num=1;
     	return num;
     }
     

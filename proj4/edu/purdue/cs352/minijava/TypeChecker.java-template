@@ -1,0 +1,23 @@
+package edu.purdue.cs352.minijava;
+
+import java.util.*;
+
+import edu.purdue.cs352.minijava.ast.*;
+import edu.purdue.cs352.minijava.ssa.*;
+import edu.purdue.cs352.minijava.types.*;
+
+public class TypeChecker {
+    SSAProgram prog;
+    Map<String, StaticType> types;
+
+    public TypeChecker(SSAProgram prog) {
+        this.prog = prog;
+        types = new HashMap<String, StaticType>();
+        types.put("Object", new ObjectType("Object", null));
+    }
+
+    public void typeCheck() {
+        // FILLIN
+        // (Hint: Create types, then assign types to SSAFields/SSAMethods, then check types in SSAStatements)
+    }
+}

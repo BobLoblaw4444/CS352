@@ -189,7 +189,10 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	this.body.add(elseLabel);
 
 	// Else Part
-	SSAStatement elsePart = (SSAStatement)ifStatement.getElsePart().accept(temp);
+	if(ifStatement.getElsePart() != null)
+	{
+	    SSAStatement elsePart = (SSAStatement)ifStatement.getElsePart().accept(temp);
+	}
 
 	// Add the temp body back to this body
 	for(SSAStatement ssa : temp.getBody())
@@ -264,7 +267,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    SSAStatement originalEntry = sym.getValue();
 	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
 	    
-	    if(originalEntry.getIndex() != newEntry.getIndex())
+	    if(newEntry != null && originalEntry.getIndex() != newEntry.getIndex())
 	    {
 		SSAStatement unify = new SSAStatement(whileStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
 		this.body.add(unify);
