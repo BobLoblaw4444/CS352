@@ -23,10 +23,10 @@ public class TypeChecker {
         // (Hint: Create types, then assign types to SSAFields/SSAMethods, then check types in SSAStatements)
 	
 	// Add Primitive types
-	types.put("IntType", new PrimitiveType.IntType());
-	types.put("BooleanType", new PrimitiveType.BooleanType());
-	types.put("VoidType", new VoidType());
-	types.put("IntTypeArray", new ObjectType("IntTypeArray", (ObjectType)types.get("Object")));
+	types.put("int", new PrimitiveType.IntType());
+	types.put("boolean", new PrimitiveType.BooleanType());
+	types.put("void", new VoidType());
+	types.put("int[]", new ObjectType("int[]", (ObjectType)types.get("Object")));
 			    
 	try
 	{
@@ -34,45 +34,38 @@ public class TypeChecker {
 	    for(SSAClass cl : prog.getClassesOrdered())
 	    {
 		String className = cl.getASTNode().getName();
+    		SSAClass supercl = cl.superclass(prog);
 
-		if(types.get(className) == null)
-		{
-    		    SSAClass supercl = cl.superclass(prog);
-
-		    // Add class type to map
-		    if(supercl != null)
+		// Add class type to map
+	        if(supercl != null)
 			types.put(className, new ObjectType(className, (ObjectType)types.get(supercl.getASTNode().getName())));
-		    else
-			types.put(className, (ObjectType)types.get("Object"));
-		    
-		}
+		else
+			types.put(className, new ObjectType(className, (ObjectType)types.get("Object")));    
+		
 	    }
+
+	    //printMap();
 
 	    // Set field and method types 
 	    for(SSAClass cl : prog.getClassesOrdered())
 	    {
 		for(SSAField field : cl.getFieldsOrdered())
 		{
-		    field.setType(GetStaticType(field.getField().getType()));
-	    	}
+		    field.setType(types.get(field.getField().getType().getName()));
+		}
 
 		// Set method return types and parameter types
 		for(SSAMethod method : cl.getMethodsOrdered())
 		{
-		    method.setRetType(GetStaticType(method.getMethod().getType()));
+		    method.setRetType(types.get(method.getMethod().getType().getName()));
 
 		    ArrayList<StaticType> params = new ArrayList<StaticType>();
 		    for(Parameter parameter : method.getMethod().getParameters())
-			params.add(GetStaticType(parameter.getType()));
+		    {
+			params.add(types.get(parameter.getType().getName()));
+		    }
 
 		    method.setParamTypes(params);
-		
-		    // Type check SSAStatements in method body
-		  /*  for(SSAStatement statement : method.getBody())
-		    {
-			DetermineOp(statement);	
-		    }
-		  */
 		}
 	    }
 
@@ -86,8 +79,7 @@ public class TypeChecker {
 		    for(SSAStatement statement : method.getBody())
 			StatementCheck(statement, cl, method);
 
-	    // DEBUG
-	    printMap();
+	   
 	}
 	catch(TypeException e)
 	{
@@ -103,6 +95,7 @@ public class TypeChecker {
 	switch(statement.getOp())
     	{
 	    case Unify:
+		UnifyCheck(statement);
 		break;
 
 	    case Alias:
@@ -114,7 +107,7 @@ public class TypeChecker {
 		break;
 
 	    case Parameter:
-		statement.setType(types.get("IntType"));
+		statement.setType(method.getParamType((Integer)statement.getSpecial()));
 		break;
 
 	    case Arg:
@@ -122,16 +115,16 @@ public class TypeChecker {
     		break;
 
 	    case Null:
-		
-    		break;
+		statement.setType(types.get(((Type)statement.getSpecial()).getName()));
+		break;
 			    
 	    // Primitive types
 	    case Int:
-		statement.setType(types.get("IntType"));
+		statement.setType(types.get("int"));
     		break;
 
 	    case Boolean:
-		statement.setType(types.get("BooleanType"));
+		statement.setType(types.get("boolean"));
     		break;
 
 	    // New objects
@@ -146,11 +139,11 @@ public class TypeChecker {
 			
 	    // Control flow
 	    case Label:
-		statement.setType(types.get("VoidType"));
+		statement.setType(types.get("void"));
     		break;
 
 	    case Goto:
-		statement.setType(types.get("VoidType"));
+		statement.setType(types.get("void"));
     		break;
 			    
 	    case Branch:
@@ -169,11 +162,16 @@ public class TypeChecker {
     		break;
 
 	    case Return:
+		if(!statement.getLeft().getType().subtypeOf(method.getRetType()))
+		{
+		    throw new TypeException("Return type is invalid");
+		}
+		statement.setType(types.get("void"));
   		break;
 
 	    // Member and index access
 	    case Member:
-				
+		MemberCheck(statement);			
     		break;
 
 	    case Index:
@@ -184,6 +182,10 @@ public class TypeChecker {
 	    case VarAssg:
 		VarAssgCheck(statement, cl, method);
  		break;
+
+	    case MemberAssg:
+		MemberAssgCheck(statement);
+		break;
 
 	    case IndexAssg:
 	    	IndexAssgCheck(statement);
@@ -204,7 +206,7 @@ public class TypeChecker {
 
 	    case Eq:
 	    case Ne:
-    		statement.setType(types.get("BooleanType"));   			    
+    		statement.setType(types.get("boolean"));   			    
 		break;
 
 	    case And:
@@ -224,9 +226,25 @@ public class TypeChecker {
     }
 
     // Unify
-    private void UnifyCheck(SSAStatement statement)
+    private void UnifyCheck(SSAStatement statement) throws TypeException
     {
+	StaticType leftType = statement.getLeft().getType();
+	StaticType rightType = statement.getRight().getType();
 
+	if(leftType.equals(rightType))
+	{
+	    statement.setType(leftType);
+	    return;
+	}
+
+	StaticType commonType = leftType.commonSupertype(rightType);
+
+	if(commonType == null)
+	{
+	    throw new TypeException("Unify statements are not comparable");
+	}
+
+	statement.setType(commonType);
     }
 
     // NewIntArray
@@ -234,12 +252,12 @@ public class TypeChecker {
     {
 	StaticType leftType = statement.getLeft().getType();
 				
-	if(!leftType.equals(types.get("IntType")))
+	if(!leftType.equals(types.get("int")))
 	{
 	    throw new TypeException("Left operand to newIntArray must be int. Found: " + leftType);
 	}
 				
-	statement.setType(types.get("IntTypeArray"));
+	statement.setType(types.get("int[]"));
     }
 
     // Branch, NBranch
@@ -247,19 +265,18 @@ public class TypeChecker {
     {
 	StaticType leftType = statement.getLeft().getType();
 
-	if(!leftType.equals(types.get("BooleanType")))
+	if(!leftType.equals(types.get("boolean")))
 	{
 	    throw new TypeException("Branch condition expected boolean but found " + leftType);
 	}
 	
-	statement.setType(types.get("VoidType"));
+	statement.setType(types.get("void"));
     }
 
     // Function calls
     private void CallCheck(SSAStatement statement) throws TypeException
     {
-	System.out.println("Name of Method:");	
-	SSAClass clazz = prog.getClass(((ObjectType)statement.getLeft().getType()).getName());
+	SSAClass clazz = prog.getClass(statement.getLeft().getType().toString());
 	SSACall call = (SSACall)statement.getSpecial();
     
 	SSAMethod meth = clazz.getMethod(prog, call.getMethod());
@@ -268,7 +285,8 @@ public class TypeChecker {
 	{
 	    throw new TypeException("No method exists in class");
 	}
-	
+
+	// Get argument types	
 	int i = 0;
 	List<StaticType> paramType = meth.getParamTypes();
 	List<StaticType> argType = new ArrayList<StaticType>();
@@ -276,30 +294,64 @@ public class TypeChecker {
 	for(SSAStatement arg : call.getArgs())
 	    argType.add(arg.getType());
 
-	while(paramType.get(i) != null && argType.get(i) != null)
+	// Check for correct number of arguments
+	if(paramType.size() != argType.size())
 	{
-	    if(!paramType.get(i).equals(argType.get(i)))
+	    throw new TypeException("Incorrect number of arguments to " + meth.getMethod().getName());
+	}
+
+
+	while(i < paramType.size())
+	{
+	    if(!argType.get(i).subtypeOf(paramType.get(i)))
 	    {
 		throw new TypeException("Invalid arguments to " + call.getMethod());
 	    }
 	    i++;
         }
-	
+	statement.setType(meth.getRetType());
     }
 
     // Print
     private void PrintCheck(SSAStatement statement) throws TypeException
     {
-	System.out.println("Print Check");
 	StaticType leftType = statement.getLeft().getType();
 			       
-	if(!leftType.equals(types.get("IntType")))
+	if(!leftType.equals(types.get("int")))
 	{
 	    throw new TypeException("Print target must be int but found " + leftType);
 	}
 	
-	statement.setType(types.get("VoidType"));
-	System.out.println("Type: "+statement.getType());
+	statement.setType(types.get("void"));
+    }
+
+    // Member
+    private void MemberCheck(SSAStatement statement) throws TypeException
+    {
+	StaticType leftType = statement.getLeft().getType();
+	
+	if(leftType.toString().equals("int[]"))
+	{
+	    if(!((String)statement.getSpecial()).equals("length"))
+	    {
+		throw new TypeException("Invalid int[] member access");
+	    }
+
+	    statement.setType(types.get("int"));
+	    return;
+	}
+
+	SSAClass clazz = prog.getClass(leftType.toString());
+	String fieldName = (String)statement.getSpecial();
+	
+	SSAField field = clazz.getField(prog, fieldName);
+
+	if(field == null)
+	{
+	    throw new TypeException("Field does not exist in class");
+	}
+
+	statement.setType(field.getType());
     }
 
     // Index
@@ -308,13 +360,13 @@ public class TypeChecker {
 	StaticType leftType = statement.getLeft().getType();
     	StaticType rightType = statement.getRight().getType();
 			        
-	if(!leftType.equals(types.get("IntTypeArray"))
-	    || !rightType.equals(types.get("IntType")))
+	if(!leftType.equals(types.get("int[]"))
+	    || !rightType.equals(types.get("int")))
 	{			    
 	    throw new TypeException("Invalid operands for index expression: " + leftType + " " + rightType);
 	}
 	
-	statement.setType(types.get("IntType"));
+	statement.setType(types.get("int"));
     }
 
     // VarAssg
@@ -331,10 +383,9 @@ public class TypeChecker {
 	    // Search vardecls for the given variable
 	    for(VarDecl varDecl : method.getMethod().getVarDecls())
 	    {	
-		System.out.println("Name: " + varDecl.getName());
 		if(varDecl.getName().equals(varName))
 		{
-		    varType = GetStaticType(varDecl.getType());
+		    varType = types.get(varDecl.getType().getName());
 		    break;
 		}
 	    }
@@ -343,10 +394,9 @@ public class TypeChecker {
 		// Search parameters for the given variable
 		for(Parameter param : method.getMethod().getParameters())
 		{	
-		    System.out.println("Name: " + param.getName());
 		    if(param.getName().equals(varName))
 		    {
-			varType = GetStaticType(param.getType());
+			varType = types.get(param.getType().getName());
 			break;
 		    }
 		}
@@ -373,19 +423,36 @@ public class TypeChecker {
 	}
     }
 
+    // MemberAssg
+    private void MemberAssgCheck(SSAStatement statement) throws TypeException
+    {
+	SSAClass clazz = prog.getClass(statement.getLeft().getType().toString());
+	
+	String fieldName = (String)statement.getSpecial();
+	
+	SSAField field = clazz.getField(prog, fieldName);
+
+	if(field == null)
+	{
+	    throw new TypeException("Field does not existin class");
+	}
+
+	statement.setType(statement.getRight().getType());
+    }
+
     // IndexAssg
     private void IndexAssgCheck(SSAStatement statement) throws TypeException
     {
 	StaticType leftType = statement.getLeft().getType();
 	StaticType rightType = statement.getRight().getType();
 
-	if(!leftType.equals(types.get("IntTypeArray"))
-	    || !rightType.equals(types.get("IntType")))
+	if(!leftType.equals(types.get("int[]"))
+	    || !rightType.equals(types.get("int")))
 	{
 	    throw new TypeException("Invalid index assignment operands: " + leftType + " " + rightType);
 	}
 	
-	statement.setType(types.get("IntType"));
+	statement.setType(types.get("int"));
     }
 
     // Not
@@ -393,12 +460,12 @@ public class TypeChecker {
     {
 	StaticType leftType = statement.getLeft().getType();
 
-	if(!leftType.equals(types.get("BooleanType")))
+	if(!leftType.equals(types.get("boolean")))
 	{
 	    throw new TypeException("Not value must be boolean but found " + leftType);
 	}
 
-	statement.setType(types.get("BooleanType"));
+	statement.setType(types.get("boolean"));
     }
 
     // Lt, Le, Gt, Ge
@@ -407,16 +474,13 @@ public class TypeChecker {
 	StaticType leftType = statement.getLeft().getType();
 	StaticType rightType = statement.getRight().getType();
 				
-	if(statement.getLeft().getType() == null)
-	    System.out.println("balls");
-
-	if(!leftType.equals(types.get("IntType"))
-	    || !rightType.equals(types.get("IntType")))
+	if(!leftType.equals(types.get("int"))
+	    || !rightType.equals(types.get("int")))
 	{
 	    throw new TypeException("Invalid operand type for comparitive operator "+ leftType + " " + statement.getOp() + " " + rightType);
 	}
 	
-	statement.setType(types.get("BooleanType"));  
+	statement.setType(types.get("boolean"));  
     }
 
     //And, Or
@@ -425,13 +489,13 @@ public class TypeChecker {
 	StaticType leftType = statement.getLeft().getType();
 	StaticType rightType = statement.getRight().getType();
 
-	if(!leftType.equals(types.get("BooleanType"))
-	    || !rightType.equals(types.get("BooleanType")))
+	if(!leftType.equals(types.get("boolean"))
+	    || !rightType.equals(types.get("boolean")))
 	{
 	    throw new TypeException("Invalid operand for logic operator: "+ leftType + " " + statement.getOp() + " " + rightType);
 	}
 	
-	statement.setType(types.get("BooleanType")); 
+	statement.setType(types.get("boolean")); 
     }
 
     // Mul, Div, Add, Minus, Mod
@@ -440,33 +504,13 @@ public class TypeChecker {
 	StaticType leftType = statement.getLeft().getType();
 	StaticType rightType = statement.getRight().getType();
 
-	if(!leftType.equals(types.get("IntType"))
-	    || !rightType.equals(types.get("IntType")))
+	if(!leftType.equals(types.get("int"))
+	    || !rightType.equals(types.get("int")))
 	{
 	    throw new TypeException("Invalid operand for arithmetic operator: "+ leftType + " " + statement.getOp() + " " + rightType);
 	}
 	
-	statement.setType(types.get("IntType")); 	
-    }
-
-    // Helper function to retrieve StaticType
-    private StaticType GetStaticType(Type type)
-    {
-	// Int
-        if(type instanceof TypeInt)
-	    return types.get("IntType");
-		    
-        // Boolean
-        else if(type instanceof TypeBoolean)
-	    return types.get("BooleanType");
-		    
-	// Int Array
-	else if(type instanceof TypeIntArray)
-	    return types.get("IntTypeArray");
-	
-	// Void
-	else
-	    return types.get("VoidType");
+	statement.setType(types.get("int")); 	
     }
 
     // Debug method to print out the type names in map
