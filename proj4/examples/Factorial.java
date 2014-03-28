@@ -4,22 +4,28 @@ class Factorial{
     }
 }
 
-class Fac {
+class Fac extends NewFac {
 int x;
-int y;
+int[] y;
+int x;
+NewFac newFac;
     public int ComputeFac(int num){
 	int num_aux ;
 	boolean str;
-
-	if (num < str)
-	    num_aux = str;
+	
+	y[0] = 6;
+	
+	//x = newFac.realMethod();
+	
+	if (num < 1)
+	    str = false;
 	else 
-	    num_aux = num * (this.ComputeFac(num-1)) ;
+	    num_aux = num * (newFac.ComputeFac(num-1)) ;
 	return num_aux ;
     }
 }
 
-class Fac{
+class NewFac{
  public int ComputeFac(int num){
 	int num_aux ;
 	if (num < 1)
@@ -28,4 +34,8 @@ class Fac{
 	    num_aux = num * (this.ComputeFac(num-1)) ;
 	return num_aux ;
     }
+}
+
+class Woo extends Fac{
+
 }
