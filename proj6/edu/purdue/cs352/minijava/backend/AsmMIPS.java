@@ -195,12 +195,12 @@ public class AsmMIPS {
     // compile this statement (FILLIN: might need more registers, coming from above method)
     private void compile(SSAProgram prog, String methodName, SSAStatement s) {
         // recommended for debuggability:
-        sb.append(" # ");
+       /* sb.append(" # ");
         if (s.getRegister() >= 0)
             sb.append(reg(s));
         sb.append(": ");
         sb.append(s.toString());
-        sb.append("\n");
+        sb.append("\n");*/
 
         switch (s.getOp()) {
             // FILLIN (this is the actual code generator!)
