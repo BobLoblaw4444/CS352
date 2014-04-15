@@ -1,0 +1,93 @@
+package edu.purdue.cs352.minijava;
+
+import java.util.*;
+
+import edu.purdue.cs352.minijava.ast.*;
+import edu.purdue.cs352.minijava.ssa.*;
+
+public class SSACompiler extends ASTVisitor.SimpleASTVisitor {
+    // The method body currently being compiled
+    List<SSAStatement> body = new ArrayList<SSAStatement>();
+
+    // Create a field for local variables (symbol table)
+    // ...
+
+    public static SSAProgram compile(Program prog) {
+        SSAMethod main = compile(prog.getMain());
+        List<SSAClass> classes = new ArrayList<SSAClass>();
+
+        for (ClassDecl cl : prog.getClasses())
+            classes.add(compile(cl));
+
+        return new SSAProgram(main, classes);
+    }
+
+    public static SSAClass compile(ClassDecl cl) {
+        List<SSAMethod> methods = new ArrayList<SSAMethod>();
+        for (MethodDecl md : cl.getMethods())
+            methods.add(compile(md));
+        return new SSAClass(cl, methods);
+    }
+
+    public static SSAMethod compile(Main main) {
+        SSACompiler compiler = new SSACompiler();
+
+        // there's only a body
+        main.getBody().accept(compiler);
+
+        return new SSAMethod(main, compiler.getBody());
+    }
+
+    public static SSAMethod compile(MethodDecl method) {
+        SSACompiler compiler = new SSACompiler();
+
+        // visit the parameters
+        // ...
+
+        // and the variable declarations
+        // ...
+
+        // then compile the body
+        // ...
+        // statement.accept(compiler);
+
+        // and the return
+        compiler.compileReturn(method.getRetExp());
+
+        return new SSAMethod(method, compiler.getBody());
+    }
+
+    @Override public Object defaultVisit(ASTNode node) {
+        throw new Error("Unsupported visitor in SSACompiler: " + node.getClass().getSimpleName());
+    }
+
+    // ...
+
+    @Override public Object visit(AssignExp exp) {
+        // what sort of statement we make, if any, depends on the LHS
+        Exp target = exp.getTarget();
+        SSAStatement ret;
+
+        if (target instanceof VarExp) {
+            // ...
+
+        } else if (target instanceof MemberExp) {
+            // ...
+
+        } else if (target instanceof IndexExp) {
+            // ...
+
+        } else {
+            throw new Error("Invalid LHS: " + target.getClass().getSimpleName());
+
+        }
+
+        return ret;
+    }
+
+    public void compileReturn(Exp retExp) {
+        // ...
+    }
+
+    public List<SSAStatement> getBody() { return body; }
+}

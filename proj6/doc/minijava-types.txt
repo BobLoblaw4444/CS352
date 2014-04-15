@@ -1,0 +1,94 @@
+Format:
+SSA operation: [left] [x right] [*special] -> result
+
+Unmentioned type combinations are illegal. 'T' and 'U' are any type, but any
+'T' must be the same type as any other 'T' on the same line, and any 'U' must
+be the same type as any other 'U' on the same time. e.g. an operation with
+type 'T -> T' has a result of type 'int' with an input (left) of type 'int'.
+
+
+# Meta:
+Unify:          T x U -> lowest supertype of T and U
+Alias:          T -> T
+
+
+# Data:
+This:           -> type of surrounding class
+Parameter:      *Integer -> type of specified parameter
+Arg:            T *Integer -> T
+Null:           *Type -> T
+                  Result type (edu.purdue.cs352.minijava.types.StaticType)
+                  corresponding to input type
+                  (edu.purdue.cs352.minijava.ast.Type) in 'special' field.
+Int:            *Integer -> int
+Boolean:        *Boolean -> boolean
+NewObj:         *String -> named type
+NewIntArray:    int -> int[]
+
+
+# Control flow:
+Label:          *String -> void
+Goto:           *String -> void
+Branch:         boolean *String -> void
+NBranch:        boolean *String -> void
+
+
+# Calls:
+Call:           Object *SSACall -> T
+                  Object's class or superclass must have a method with the
+                  given name. Each of the argument types must be a subtype of
+                  the method's corresponding parameter type. Each of the
+                  arguments must reference an 'Arg' SSAStatement. T is the
+                  discovered method's return type.
+Print:          int -> void
+Return:         T -> void
+                  T must be a subtype of the return type of the enclosing
+                  method.
+
+
+# Member access:
+Member:         Object *String -> T
+                  The given name must not be "length". Object's class or
+                  superclass must have a field with the given name. T is the
+                  type of that field.
+                int[] *"length" -> int
+Index:          int[] int -> int
+
+
+# Stack instructions are generated after type checking, and so do not require
+# type checkers. For completeness sake, these are the types that would be
+# required.
+Store:          T *Integer -> void
+Load:           *Integer -> U
+                  U is the lowest supertype of type T for every Store in the
+                  method with the same offset in special.
+
+
+# Assignments:
+VarAssg:        T *String -> U
+                  Special refers to a local variable. Variable must be
+                  defined. The variable's type is U. T must be a subtype of U.
+MemberAssg:     Object T *String -> U
+                  Object's class or superclass must have a field with the
+                  given name of type U. T must be a subtype of U.
+IndexAssg:      int[] int *SSAStatement(int) -> int
+
+
+# Unary operator:
+Not:            boolean -> boolean
+
+
+# Binary operators:
+Lt:             int x int -> boolean
+Le:             int x int -> boolean
+Eq:             T x U -> boolean
+Ne:             T x U -> boolean
+Gt:             int x int -> boolean
+Ge:             int x int -> boolean
+And:            boolean x boolean -> boolean
+Or:             boolean x boolean -> boolean
+Plus:           int x int -> int
+Minus:          int x int -> int
+Mul:            int x int -> int
+Div:            int x int -> int
+Mod:            int x int -> int
