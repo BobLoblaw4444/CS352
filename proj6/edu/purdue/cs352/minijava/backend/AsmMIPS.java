@@ -120,6 +120,7 @@ public class AsmMIPS {
         sb.append("\n");
         sb.append("mj__v_" + cl.getASTNode().getName() + ":\n");
         // FILLIN
+		
 
         // now compile the actual methods
         sb.append(".text\n");
