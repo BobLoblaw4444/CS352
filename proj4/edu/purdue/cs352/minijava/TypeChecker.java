@@ -52,20 +52,8 @@ public class TypeChecker {
 
     // Check for nonexistent superclasses
     for(Map.Entry<String, StaticType> type : types.entrySet())
-    {
       if(type.getValue() == null)
         throw new Error("Unknown type " + type.getKey());
-
-      if(type.getValue().subtypeOf(type.getValue()))
-	throw new Error("Cyclical inheritance detected");
-     /* ObjectType superType = ((ObjectType)type.getValue()).getSuperType();
-      if(superType != null)
-      {
-	SSAClass superClass = prog.getClass(superType.getName());
-	if(superClass != null && (superClass.getASTNode().getName().)equals(type.getKey()))
-	  throw new Error("Cyclical dependence detected");
-      }*/
-    }
 
     //*********** If you want to test for redundancies, this should help ************
     //printMap();
@@ -391,6 +379,10 @@ public class TypeChecker {
     StaticType varType = null;
     String varName = (String)statement.getSpecial();
 
+    //SSAField var = cl.getField(prog, varName);
+
+    //if(var == null)
+    //{
       // Search vardecls for the given variable
       for(VarDecl varDecl : method.getMethod().getVarDecls())
       {
@@ -418,6 +410,11 @@ public class TypeChecker {
           throw new Error("Local variable " + varName + " does not exist on line " + statement.getIndex());
         }
       }
+    //}
+    //else
+    //{
+      //varType = var.getType();
+    //}
 
     if(leftType.subtypeOf(varType))
     {

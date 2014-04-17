@@ -220,10 +220,13 @@ public class AsmMIPS {
 	        	break;
 
 	        case Alias:
-	          break;
+	        	newLine = false;
+	          	break;
 
 	        case This:
-	          break;
+	        	ssaGen("move", s, false, false);
+	        	sb.append("$v0");
+	          	break;
 
 	        case Parameter:
 				newLine = false;
@@ -245,7 +248,21 @@ public class AsmMIPS {
 	        	break;
 
 	        case Boolean:
-	          break;
+				if(((boolean)s.getSpecial()))
+				{
+					ssaGen("li", s, false, false);
+					sb.append("1");
+				}
+				else if(!((boolean)s.getSpecial()))
+				{
+					ssaGen("move", s, false, false);
+					sb.append("$zero");
+				}
+				else
+				{
+					System.out.println("Boolean isn't true or false!");
+				}	
+	        	break;
 
 	          // New objects
 	        case NewObj:
@@ -323,6 +340,9 @@ public class AsmMIPS {
 
 	          // Not
 	        case Not:
+	        	ssaGen("seq", s, false, false);
+	        	sb.append("$zero, ");
+	        	printReg(s.getLeft());
 	          break;
 
 	          // Binary Expressions

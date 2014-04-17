@@ -94,11 +94,11 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     // Parameters
     @Override public Object visit(Parameter param)
     {
-	
+
 	SSAStatement ret = new SSAStatement(param, SSAStatement.Op.Parameter, this.pos);
-	
+
 	this.body.add(ret);
-	
+
 	pos++;
 	return ret;
     }
@@ -109,7 +109,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	SSAStatement ret;
 
 	ret = new SSAStatement(varDecl, SSAStatement.Op.Null, varDecl.getType());
-	
+
 	this.symbolTable.put(varDecl.getName(), ret);
 
 	this.body.add(ret);
@@ -125,7 +125,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
     // Exp
     @Override public Object visit(Exp exp)
-    {   
+    {
 	//Exp exp = expStatement.getExp();
 	SSAStatement ret;
 
@@ -162,7 +162,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(IfStatement ifStatement)
     {
 	SSAStatement ret = null;
-	
+
 	// Get current time to make sure to avoid label collisions
 	long currTime = System.nanoTime() / 1000;
 
@@ -179,7 +179,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
 	// If Part
 	SSAStatement ifPart = (SSAStatement)ifStatement.getIfPart().accept(this);
-	
+
 	// Goto Statement
 	SSAStatement gotoStatement = new SSAStatement(ifStatement, SSAStatement.Op.Goto);
 	this.body.add(gotoStatement);
@@ -191,9 +191,9 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	// Else Part
 	if(ifStatement.getElsePart() != null)
 	{
-	    SSAStatement elsePart = (SSAStatement)ifStatement.getElsePart().accept(temp);
+		SSAStatement elsePart = (SSAStatement)ifStatement.getElsePart().accept(temp);
 	}
-
+	
 	// Add the temp body back to this body
 	for(SSAStatement ssa : temp.getBody())
 	    this.body.add(ssa);
@@ -211,7 +211,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	{
 	    SSAStatement originalEntry = sym.getValue();
 	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
-	    
+
 	    // Update the changed variables
 	    if(newEntry != null && originalEntry.getIndex() != newEntry.getIndex())
 	    {
@@ -219,8 +219,8 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 		this.body.add(unify);
 		this.symbolTable.put(sym.getKey(), unify);
 	    }
-	}	
-	
+	}
+
 	ret = notBranch;
 	return ret;
     }
@@ -237,7 +237,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	// Condition Label
 	SSAStatement conditionLabel = new SSAStatement(whileStatement, SSAStatement.Op.Label, ("WhileCondition-" + currTime));
 	this.body.add(conditionLabel);
-	
+
 	// Condition
 	SSAStatement condition = (SSAStatement)whileStatement.getCondition().accept(this);
 
@@ -247,7 +247,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 
 	// Loop Body
 	SSAStatement body = (SSAStatement)whileStatement.getBody().accept(temp);
-	
+
 	// Add the temp body back to this body
 	for(SSAStatement ssa : temp.getBody())
 	    this.body.add(ssa);
@@ -266,7 +266,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	{
 	    SSAStatement originalEntry = sym.getValue();
 	    SSAStatement newEntry =  temp.symbolTable.get(sym.getKey());
-	    
+
 	    if(newEntry != null && originalEntry.getIndex() != newEntry.getIndex())
 	    {
 		SSAStatement unify = new SSAStatement(whileStatement, SSAStatement.Op.Unify, originalEntry, newEntry);
@@ -282,9 +282,9 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(PrintStatement statement)
     {
         SSAStatement ret;
-	
+
 	SSAStatement value = (SSAStatement)((PrintStatement)statement).getValue().accept(this);
-	
+
 	ret = new SSAStatement(statement, SSAStatement.Op.Print, value, null, null);
 
 	this.body.add(ret);
@@ -298,12 +298,12 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         // what sort of statement we make, if any, depends on the LHS
         Exp target = exp.getTarget();
         SSAStatement ret;
-        
+
 	// Assign to variable
 	if (target instanceof VarExp )
-        { 
+        {
 	    String name = ((VarExp)target).getName();
-		
+
 	    // Check if this variable is in the symbol table, if not its a member of this
 	    if(this.symbolTable.get(name) == null)
 	    {
@@ -316,7 +316,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	    else
 	    {
 		SSAStatement value = (SSAStatement)exp.getValue().accept(this);
-		ret = new SSAStatement(exp, SSAStatement.Op.VarAssg, value, null, name);            
+		ret = new SSAStatement(exp, SSAStatement.Op.VarAssg, value, null, name);
 		this.symbolTable.put(name, ret);
 	    }
 	}
@@ -324,7 +324,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         else if (target instanceof MemberExp )
         {
 	    String name = ((MemberExp)target).getMember();
-	   
+
 	    SSAStatement member = (SSAStatement)((MemberExp)target).getSub().accept(this);
 
 	    SSAStatement value = (SSAStatement)exp.getValue().accept(this);
@@ -335,9 +335,9 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
         else if (target instanceof IndexExp)
         {
 	    SSAStatement array = (SSAStatement)((IndexExp)target).getTarget().accept(this);
-	    SSAStatement index = (SSAStatement)((IndexExp)target).getIndex().accept(this);	    
+	    SSAStatement index = (SSAStatement)((IndexExp)target).getIndex().accept(this);
 	    SSAStatement value = (SSAStatement)exp.getValue().accept(this);
-            
+
 	    ret = new SSAStatement(exp, SSAStatement.Op.IndexAssg, array, value, index);
         }
         else
@@ -353,7 +353,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(BinaryExp binExp)
     {
 	SSAStatement ret;
-	
+
 	SSAStatement left = (SSAStatement)(binExp.getLeft().accept(this));
 	SSAStatement right = (SSAStatement)(binExp.getRight().accept(this));
 	SSAStatement.Op op = determineOp(binExp.getOp());
@@ -422,7 +422,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(IntLiteralExp intLit)
     {
 	SSAStatement ret = new SSAStatement(intLit, SSAStatement.Op.Int, intLit.getValue());
-	
+
 	this.body.add(ret);
 	return ret;
     }
@@ -431,7 +431,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(BooleanLiteralExp boolLit)
     {
 	SSAStatement ret = new SSAStatement(boolLit, SSAStatement.Op.Boolean, boolLit.getValue());
-	
+
 	this.body.add(ret);
 	return ret;
     }
@@ -440,17 +440,17 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(VarExp var)
     {
 	SSAStatement ret = this.symbolTable.get(var.getName());
-	
+
 	if(ret == null)
-	{ 
+	{
 	    SSAStatement thisExp = new SSAStatement(var, SSAStatement.Op.This, null);
 	    this.body.add(thisExp);
-	
+
 	    ret = new SSAStatement(var, SSAStatement.Op.Member, thisExp, null, var.getName());
-	    
+
 	    this.body.add(ret);
 	}
-	
+
 	return ret;
     }
 
@@ -458,7 +458,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(ThisExp thisExp)
     {
 	SSAStatement ret = new SSAStatement(thisExp, SSAStatement.Op.This, null);
-	
+
 	this.body.add(ret);
 	return ret;
     }
@@ -468,7 +468,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     {
 	SSAStatement size = (SSAStatement)(intArray.getSize().accept(this));
 	SSAStatement ret = new SSAStatement(intArray, SSAStatement.Op.NewIntArray, size, null, null);
-	
+
 	this.body.add(ret);
 	return ret;
     }
@@ -477,7 +477,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     @Override public Object visit(NewObjectExp newObj)
     {
 	SSAStatement ret = new SSAStatement(newObj, SSAStatement.Op.NewObj, newObj.getName());
-	
+
 	this.body.add(ret);
 	return ret;
     }
@@ -488,7 +488,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
 	SSAStatement ret;
 
 	ret = new SSAStatement(retExp, SSAStatement.Op.Return, (SSAStatement)retExp.accept(this) , null, null);
-	
+
 	this.body.add(ret);
     }
 
@@ -496,7 +496,7 @@ public class SSACompiler extends ASTVisitor.SimpleASTVisitor
     private SSAStatement.Op determineOp(Token op)
     {
 	String symbol = op.toString();
-	
+
 	if(symbol.equals("<"))
 	{
 	    return SSAStatement.Op.Lt;

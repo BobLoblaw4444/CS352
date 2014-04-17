@@ -10,9 +10,15 @@ class Fac {
 	
     public int ComputeFac(int num)
 	{
+		boolean boo;
 		int num_aux ;
+		
+		boo = true;
+		boo = false;
+		boo = !boo;
+		
 		if (num < 1)
-	    	num_aux = 1 ;
+	    	num_aux = 3 ;
 		else if(num != 7 && true){}
 		else if(num == 5 || false){}
 		else 
