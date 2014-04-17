@@ -16,10 +16,6 @@ public class ClassLayout {
 		{			
 			for(SSAField field : cl.getFieldsOrdered())
 			{
-				/*if(!totalFieldList.contains(field.getKey()))
-				{
-					totalFieldList.add(field.getKey());	
-				}*/
 				totalFieldSet.add(field.getName());				
 			}
 			
@@ -121,7 +117,7 @@ public class ClassLayout {
     }
 
     // for a given method, get the implementing class
-    public SSAClass getImplementor(SSAProgram prog, SSAClass cl, String method) 
+    public static SSAClass getImplementor(SSAProgram prog, SSAClass cl, String method) 
 	{
 		return cl.getMethodProvider(prog, method);
     }

@@ -17,6 +17,8 @@ class Fac {
 		boo = false;
 		boo = !boo;
 		
+		this.b = 6;
+		
 		if (num < 1)
 	    	num_aux = 3 ;
 		else if(num != 7 && true){}

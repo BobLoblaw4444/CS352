@@ -102,7 +102,7 @@ public class AsmMIPS {
         ); 
 
         // first compile main
-        compiler.compile(prog, prog.getMain(), "mj_main");
+        compiler.compile(prog, null, prog.getMain(), "mj_main");
 
         // then compile all the classes
         for (SSAClass cl : prog.getClassesOrdered()) {
@@ -126,12 +126,12 @@ public class AsmMIPS {
         sb.append(".text\n");
         for (SSAMethod m : cl.getMethodsOrdered()) {
             String name = "mj__m_" + cl.getASTNode().getName() + "_" + m.getMethod().getName();
-            compile(prog, m, name);
+            compile(prog, cl, m, name);
         }
     }
 
     // compile this method with this name
-    private void compile(SSAProgram prog, SSAMethod m, String name) {
+    private void compile(SSAProgram prog, SSAClass cl, SSAMethod m, String name) {
         // beginning of the prologue
         sb.append(name);
         sb.append(":\n");
@@ -179,7 +179,7 @@ public class AsmMIPS {
         
 		// now write the code
         for (SSAStatement s : m.getBody()) {
-            compile(prog, name, s);
+            compile(prog, cl, name, s);
         }
 
         // the epilogue starts here
@@ -200,7 +200,7 @@ public class AsmMIPS {
     }
 
     // compile this statement (FILLIN: might need more registers, coming from above method)
-    private void compile(SSAProgram prog, String methodName, SSAStatement s) {
+    private void compile(SSAProgram prog, SSAClass cl, String methodName, SSAStatement s) {
         // recommended for debuggability:
         sb.append(" # ");
         if (s.getRegister() >= 0)
@@ -211,6 +211,8 @@ public class AsmMIPS {
 
 		boolean newLine = true;
 
+		sb.append(" ");
+		
         switch (s.getOp()) 
 		{
             // FILLIN (this is the actual code generator!)
@@ -286,15 +288,16 @@ public class AsmMIPS {
 				break;
 
 	        case Branch:
+	        case NBranch:
 				ssaGen("beq", s, true, false);
 				sb.append(", .");
 				sb.append(s.getSpecial());
-        		break;
+        		//break;
 				
-	        case NBranch:
-				ssaGen("bne", s, true, false);
+	        
+				/*ssaGen("bne", s, true, false);
 				sb.append(", .");
-				sb.append(s.getSpecial());
+				sb.append(s.getSpecial());*/
 	        	break;
 
 	          // Function call
@@ -332,7 +335,21 @@ public class AsmMIPS {
 				break;
 
 	        case MemberAssg:
-	          break;
+	        	sb.append("sw ");
+	        	printReg(s.getRight());
+	        	sb.append(", ");
+	        	sb.append(ClassLayout.fieldOffset(prog, cl, ((String)s.getSpecial())) * wordSize);
+	        	sb.append("(");
+	        	printReg(s.getLeft()); 
+	        	sb.append(")");
+	        	
+	        	if(!reg(s).equals(reg(s.getRight())))
+	        	{
+	        		ssaGen("\n move", s, false, false);
+	        		printReg(s.getRight());
+	        	}
+	        	
+	        	break;
 
 	        case IndexAssg:
 	          
@@ -367,8 +384,19 @@ public class AsmMIPS {
 				break;
 				
 	        case And:
+	        	ssaGen("add", s, true, true);
+	        	sb.append("\n");
+	        	ssaGen(" seq", s, false, false);
+	        	printReg(s);
+	        	sb.append(", 2");
+	        	break;
 	        case Or:
-	          break;
+	       		ssaGen("add", s, true, true);
+	        	sb.append("\n");
+	        	ssaGen(" sgt", s, false, false);
+	        	printReg(s);
+	        	sb.append(", 0");
+	          	break;
 
 	        case Plus:
 				ssaGen("add", s, true, true);
