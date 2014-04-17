@@ -157,22 +157,27 @@ public class AsmMIPS {
                     s.pinRegister(-1); // pin to -1 to do this at Call time
             }
         }
+		
+		int originalSize = m.getBody().size();
 
         // FILLIN: perform register allocation
+		RegisterAllocator.alloc(m, freeRegisters.length);
 
         // FILLIN: figure out how much space we need to reserve for spills
-        int spillSpace = 0;
+        int spillSpace = m.getBody().size() - originalSize;
 
         // FILLIN: and perhaps any other space we need to reserve (saved registers?)
 
         // FILLIN: reserve space
         sb.append(" add $sp, $sp, -");
-        sb.append(wordSize*(/*FILLIN*/1));
+        sb.append(wordSize*(spillSpace));
         sb.append("\n");
 
         // FILLIN: save the callee-saved registers, anything else that needs to be saved
-
-        // now write the code
+		int[] calleeReg = new int[calleeSavedRegisters.length];
+		System.arraycopy( calleeSavedRegisters, 0, calleeReg, 0, calleeSavedRegisters.length );
+        
+		// now write the code
         for (SSAStatement s : m.getBody()) {
             compile(prog, name, s);
         }
@@ -183,7 +188,8 @@ public class AsmMIPS {
         sb.append(":\n");
 
         // FILLIN: restore the callee-saved registers (anything else?)
-
+		System.arraycopy( calleeReg, 0, calleeSavedRegisters, 0, calleeSavedRegisters.length );
+        
         // and the rest of the epilogue
         sb.append(" move $sp, $fp\n");
         sb.append(" lw $fp, ($sp)\n");
@@ -196,20 +202,190 @@ public class AsmMIPS {
     // compile this statement (FILLIN: might need more registers, coming from above method)
     private void compile(SSAProgram prog, String methodName, SSAStatement s) {
         // recommended for debuggability:
-       /* sb.append(" # ");
+        sb.append(" # ");
         if (s.getRegister() >= 0)
             sb.append(reg(s));
         sb.append(": ");
         sb.append(s.toString());
-        sb.append("\n");*/
+        sb.append("\n");
 
-        switch (s.getOp()) {
+		boolean newLine = true;
+
+        switch (s.getOp()) 
+		{
             // FILLIN (this is the actual code generator!)
+			
+	        case Unify:
+				newLine = false;
+	        	break;
 
+	        case Alias:
+	          break;
+
+	        case This:
+	          break;
+
+	        case Parameter:
+				newLine = false;
+	        	break;
+
+	        case Arg:
+				newLine = false;
+	        	break;
+
+	        case Null:
+				ssaGen("move", s, false, false);
+				sb.append("$zero");
+	        	break;
+
+	          // Primitive types
+	        case Int:
+				ssaGen("li", s, false, false);
+				sb.append(s.getSpecial());
+	        	break;
+
+	        case Boolean:
+	          break;
+
+	          // New objects
+	        case NewObj:
+
+	          break;
+
+	        case NewIntArray:
+	          break;
+
+	          // Control flow
+	        case Label:
+				sb.append(".");
+				sb.append(s.getSpecial());
+	        	sb.append(":");
+				break;
+
+	        case Goto:
+				sb.append("j ");
+				sb.append(".");
+	        	sb.append(s.getSpecial());
+				break;
+
+	        case Branch:
+	        case NBranch:
+				ssaGen("beq", s, true, false);
+				sb.append(".");
+				sb.append(s.getSpecial());
+	        	break;
+
+	          // Function call
+	        case Call:
+	          break;
+
+	          // Print
+	        case Print:
+	          break;
+
+	        case Return:
+				sb.append("move ");
+				sb.append("$");
+				sb.append("v0, ");
+				printReg(s);
+	        	break;
+
+	          // Member and index access
+	        case Member:
+	          break;
+
+	        case Index:
+	          break;
+
+	          // Assignment
+	        case VarAssg:
+				newLine = false;
+				break;
+
+	        case MemberAssg:
+	          break;
+
+	        case IndexAssg:
+	          
+	          break;
+
+	          // Not
+	        case Not:
+	          break;
+
+	          // Binary Expressions
+	        case Lt:
+				ssaGen("slt", s, true, true);
+				break;
+	        case Le:
+	        case Gt:
+	        case Ge:
+	        	break;
+
+	        case Eq:
+	        case Ne:
+	          break;
+
+	        case And:
+	        case Or:
+	          break;
+
+	        case Plus:
+				ssaGen("add", s, true, true);
+				break;
+	        case Minus:
+				ssaGen("sub", s, true, true);
+				break;
+	        case Mul:
+				ssaGen("mul", s, true, true);
+				break;
+	        case Div:
+				ssaGen("div", s, true, true);
+				break;
+	        case Mod:
+				ssaGen("mod", s, true, true);
+				break;	      
+			
             default:
                 throw new Error("Implement MIPS compiler for " + s.getOp() + "!");
         }
+		
+		if(newLine)
+		{
+			sb.append("\n");
+		}
     }
+
+	private void printReg(SSAStatement s)
+	{
+		sb.append("$");
+		sb.append(reg(s));
+	}
+
+	private void ssaGen(String command, SSAStatement s, boolean printLeft, boolean printRight)
+	{
+		sb.append(command);
+		sb.append(" ");
+		printReg(s);
+		sb.append(", ");
+		
+		if(printLeft)
+		{
+			printReg(s.getLeft());
+			sb.append(", ");
+		}
+		
+		if(printRight)
+		{
+			printReg(s.getRight());
+			//sb.append(", ");
+		}
+	}
+
+	private String reg(SSAStatement s)
+	{
+		return registers[freeRegisters[s.getRegister()]];
+	}
 
     // get the actual code generated
     public String toString() {
