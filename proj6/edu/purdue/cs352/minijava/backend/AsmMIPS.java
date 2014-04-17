@@ -269,9 +269,14 @@ public class AsmMIPS {
 				break;
 
 	        case Branch:
-	        case NBranch:
 				ssaGen("beq", s, true, false);
-				sb.append(".");
+				sb.append(", .");
+				sb.append(s.getSpecial());
+        		break;
+				
+	        case NBranch:
+				ssaGen("bne", s, true, false);
+				sb.append(", .");
 				sb.append(s.getSpecial());
 	        	break;
 
@@ -299,7 +304,14 @@ public class AsmMIPS {
 
 	          // Assignment
 	        case VarAssg:
-				newLine = false;
+				if(reg(s).equals(reg(s.getLeft())))
+				{
+					newLine = false;
+				}
+				else
+				{
+					ssaGen("move", s, true, false);
+				}
 				break;
 
 	        case MemberAssg:
@@ -318,14 +330,22 @@ public class AsmMIPS {
 				ssaGen("slt", s, true, true);
 				break;
 	        case Le:
+				ssaGen("sle", s, true, true);
+				break;
 	        case Gt:
+				ssaGen("sgt", s, true, true);
+				break;
 	        case Ge:
-	        	break;
+				ssaGen("sge", s, true, true);
+				break;
 
 	        case Eq:
+				ssaGen("seq", s, true, true);
+				break;
 	        case Ne:
-	          break;
-
+				ssaGen("sne", s, true, true);
+				break;
+				
 	        case And:
 	        case Or:
 	          break;
@@ -372,11 +392,11 @@ public class AsmMIPS {
 		if(printLeft)
 		{
 			printReg(s.getLeft());
-			sb.append(", ");
 		}
 		
 		if(printRight)
 		{
+			sb.append(", ");
 			printReg(s.getRight());
 			//sb.append(", ");
 		}
