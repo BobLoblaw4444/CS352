@@ -7,11 +7,15 @@ class Factorial{
 class Fac {
 	int i;
 	int b;
+	int a;
+	int y;
 	
     public int ComputeFac(int num)
 	{
 		boolean boo;
-		int num_aux ;
+		int num_aux;
+		int kool;
+		Fac fac;
 		
 		boo = true;
 		boo = false;

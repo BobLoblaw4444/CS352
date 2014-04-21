@@ -235,6 +235,10 @@ public class AsmMIPS {
 	        	break;
 
 	        case Arg:
+				if(reg(s.getLeft()).equals(Integer.toString(s.getRegister())))
+				{
+					ssaGen("move", s, true, false);
+				}
 				newLine = false;
 	        	break;
 
@@ -250,12 +254,12 @@ public class AsmMIPS {
 	        	break;
 
 	        case Boolean:
-				if(((boolean)s.getSpecial()))
+				if(((Boolean)s.getSpecial()))
 				{
 					ssaGen("li", s, false, false);
 					sb.append("1");
 				}
-				else if(!((boolean)s.getSpecial()))
+				else if(!((Boolean)s.getSpecial()))
 				{
 					ssaGen("move", s, false, false);
 					sb.append("$zero");
@@ -268,8 +272,43 @@ public class AsmMIPS {
 
 	          // New objects
 	        case NewObj:
-
-	          break;
+				String type = ((String)s.getSpecial());
+				SSAClass newClass = prog.getClass(type);
+				
+				if(newClass == null)
+				{
+					throw new Error("Uh, well this is awkward, but we actually don't have a class by that name.");
+				}
+				
+				int objectSize = ClassLayout.objectSize(prog, newClass);
+				
+				//int i;
+				//for(i = 1; i < objectSize; i++)
+				//{
+				sb.append("sw $v0, -4($fp)\n "); 
+				sb.append("sw $v1, -8($fp)\n "); 
+				sb.append("sw $a0, -12($fp)\n "); 
+					
+					//}
+				
+				sb.append("la $a0, mj__v_" + type + ":\n ");
+				sb.append("li $a1, " + objectSize + "\n ");
+				sb.append("jal minijavaNew\n ");
+				
+				ssaGen("move", s, false, false);
+				sb.append("$v0\n ");
+				
+				/*for(i = 1; i < objectSize; i++)
+				{
+					sb.append("lw $" + registers[freeRegisters[i]] + ", -" + (i * 4) + "($fp)\n "); 
+				}
+				*/
+				sb.append("lw $v0, -4($fp)\n "); 
+				sb.append("lw $v1, -8($fp)\n "); 
+				sb.append("lw $a0, -12($fp)\n "); 
+				
+				newLine = false;
+	        	break;
 
 	        case NewIntArray:
 	          break;
@@ -302,7 +341,16 @@ public class AsmMIPS {
 
 	          // Function call
 	        case Call:
-	          break;
+				SSACall call = ((SSACall)s.getSpecial());
+				
+				
+				/*for(int i = 1; i < objectSize; i++)
+				{
+					sb.append("lw $" + registers[freeRegisters[i]] + ", -" + (i * 4) + "($fp)\n "); 
+				}
+			*/
+				newLine = false;
+	        	break;
 
 	          // Print
 	        case Print:
@@ -410,9 +458,15 @@ public class AsmMIPS {
 	        case Div:
 				ssaGen("div", s, true, true);
 				break;
-	        case Mod:
-				ssaGen("mod", s, true, true);
-				break;	      
+			case Mod:
+				sb.append("div ");
+                printReg(s.getRight());
+                sb.append(", ");
+                printReg(s);
+
+                sb.append("\n mfhi ");
+                printReg(s);                                
+                break;      
 			
             default:
                 throw new Error("Implement MIPS compiler for " + s.getOp() + "!");
