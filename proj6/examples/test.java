@@ -16,10 +16,14 @@ class Fac {
 		int num_aux;
 		int kool;
 		Fac fac;
+		int[] array;
 		
+		fac = new Fac();
 		boo = true;
 		boo = false;
 		boo = !boo;
+		
+		array = new int[8];
 		
 		this.b = 6;
 		
@@ -29,6 +33,7 @@ class Fac {
 		else if(num == 5 || false){}
 		else 
 	    	num_aux = num * (this.ComputeFac(num-1)) ;
+		System.out.println(this.b);
 		return num_aux ;
     }
 

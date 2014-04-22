@@ -55,6 +55,8 @@ public class AsmMIPS {
         8, 9, 10, 11, 12, 13, 14, 15, 24, 25 // t*
     };
 
+	private HashSet<Integer> usedRegisters = new HashSet<Integer>();
+
     private AsmMIPS(StringBuilder sb) {
         this.sb = sb;
     }
@@ -132,7 +134,11 @@ public class AsmMIPS {
 
     // compile this method with this name
     private void compile(SSAProgram prog, SSAClass cl, SSAMethod m, String name) {
-        // beginning of the prologue
+		// Add v0 and v1 to list
+		usedRegisters.add(2);
+		usedRegisters.add(3);
+		
+		// beginning of the prologue
         sb.append(name);
         sb.append(":\n");
         sb.append(" add $sp, $sp, -");
@@ -178,7 +184,16 @@ public class AsmMIPS {
 		System.arraycopy( calleeSavedRegisters, 0, calleeReg, 0, calleeSavedRegisters.length );
         
 		// now write the code
-        for (SSAStatement s : m.getBody()) {
+       /* for (SSAStatement s : m.getBody()) 
+		{
+			setUsedRegisters(s);
+            //compile(prog, cl, name, s);
+        }*/
+		
+		// now write the code
+        for (SSAStatement s : m.getBody()) 
+		{
+			setUsedRegisters(s);
             compile(prog, cl, name, s);
         }
 
@@ -197,6 +212,8 @@ public class AsmMIPS {
         sb.append(wordSize);
         sb.append("\n");
         sb.append(" j $ra\n");
+		
+		usedRegisters.clear();
     }
 
     // compile this statement (FILLIN: might need more registers, coming from above method)
@@ -212,7 +229,7 @@ public class AsmMIPS {
 		boolean newLine = true;
 
 		sb.append(" ");
-		
+				
         switch (s.getOp()) 
 		{
             // FILLIN (this is the actual code generator!)
@@ -282,14 +299,7 @@ public class AsmMIPS {
 				
 				int objectSize = ClassLayout.objectSize(prog, newClass);
 				
-				//int i;
-				//for(i = 1; i < objectSize; i++)
-				//{
-				sb.append("sw $v0, -4($fp)\n "); 
-				sb.append("sw $v1, -8($fp)\n "); 
-				sb.append("sw $a0, -12($fp)\n "); 
-					
-					//}
+				saveRegisters();
 				
 				sb.append("la $a0, mj__v_" + type + ":\n ");
 				sb.append("li $a1, " + objectSize + "\n ");
@@ -298,20 +308,16 @@ public class AsmMIPS {
 				ssaGen("move", s, false, false);
 				sb.append("$v0\n ");
 				
-				/*for(i = 1; i < objectSize; i++)
-				{
-					sb.append("lw $" + registers[freeRegisters[i]] + ", -" + (i * 4) + "($fp)\n "); 
-				}
-				*/
-				sb.append("lw $v0, -4($fp)\n "); 
-				sb.append("lw $v1, -8($fp)\n "); 
-				sb.append("lw $a0, -12($fp)\n "); 
+				loadRegisters();
 				
 				newLine = false;
 	        	break;
 
 	        case NewIntArray:
-	          break;
+				saveRegisters();
+				sb.append("jal minijavaNewArray\n ");
+				loadRegisters();
+				break;
 
 	          // Control flow
 	        case Label:
@@ -343,23 +349,26 @@ public class AsmMIPS {
 	        case Call:
 				SSACall call = ((SSACall)s.getSpecial());
 				
+				saveRegisters();
 				
-				/*for(int i = 1; i < objectSize; i++)
-				{
-					sb.append("lw $" + registers[freeRegisters[i]] + ", -" + (i * 4) + "($fp)\n "); 
-				}
-			*/
+				ssaGen("move", s, true, false);
+				
+				sb.append("\n lw $v1, 0($v1)\n jal $v1\n ");
+				
+				loadRegisters();
+			
 				newLine = false;
 	        	break;
 
 	          // Print
 	        case Print:
-	          break;
+				saveRegisters();
+				sb.append("jal minijavaPrint \n ");
+				loadRegisters();
+				break;
 
 	        case Return:
-				sb.append("move ");
-				sb.append("$");
-				sb.append("v0, ");
+				sb.append("move $v0, ");
 				printReg(s);
 	        	break;
 
@@ -478,6 +487,43 @@ public class AsmMIPS {
 		}
     }
 
+	// Helper functions for saving registers
+	private void setUsedRegisters(SSAStatement s)
+	{
+		SSAStatement left = s.getLeft();
+		SSAStatement right = s.getRight();
+		
+		if(s.getRegister() != -1)
+			usedRegisters.add(s.getRegister() + 4);
+		
+		if(left != null && left.getRegister() > 1)
+			usedRegisters.add(left.getRegister() + 4);
+		
+		if(right != null && right.getRegister() != 1)
+			usedRegisters.add(right.getRegister() + 4);
+	}
+
+	private void saveRegisters()
+	{
+		int i = 1;
+		for(int register : usedRegisters)
+		{
+			sb.append("sw $" + registers[register] + ", -" + (i * wordSize) + "($fp)\n ");
+			i++;
+		}
+	}
+	
+	private void loadRegisters()
+	{
+		int i = 1;
+		for(int register : usedRegisters)
+		{
+			sb.append("lw $" + registers[register] + ", -" + (i * wordSize) + "($fp)\n ");
+			i++;
+		}
+	}
+
+	// Helper methods for printing registers
 	private void printReg(SSAStatement s)
 	{
 		sb.append("$");
